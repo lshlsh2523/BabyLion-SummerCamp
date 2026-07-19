@@ -1,6 +1,6 @@
 /** 플로우 전역 상수 — 명세서·API 명세 기준의 매직넘버는 전부 여기서만 관리 */
 export const CONFIG = {
-  PHOTO_MIN: 3,
+  PHOTO_MIN: 4,
   PHOTO_MAX: 5,
   PHOTO_MAX_MB: 10,
 

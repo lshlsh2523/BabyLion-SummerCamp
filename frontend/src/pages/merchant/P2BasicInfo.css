@@ -66,12 +66,16 @@
 /* ④ 영업시간 */
 .p2-hours { width: 100%; display: flex; flex-direction: column; gap: 16px; }
 .p2-hours__row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.p2-hours__row--days { align-items: flex-start; }
 .p2-hours__label {
   width: 78px;
   font-size: 19px;
   font-weight: var(--fw-bold);
   color: var(--green-900);
   flex-shrink: 0;
+}
+.p2-hours__row--days .p2-hours__label {
+  padding-top: 20px;     /* 요일 그리드 1행(64px)과 라벨 세로 중앙 맞춤 */
 }
 .p2-chip {
   min-height: 52px;
@@ -83,10 +87,21 @@
   font-weight: var(--fw-medium);
   color: var(--green-text-sub);
 }
-.p2-chip--day { min-width: 52px; padding: 0; }
 .p2-chip--on {
   background: var(--grad-select);
   border-color: var(--green-600);
   color: #fff;
   font-weight: var(--fw-bold);
 }
+
+/* 요일 7칸 — 3열 그리드(3+3+1)로 줄바꿈 시에도 열이 정확히 맞도록 고정.
+   4열은 라벨(78px)까지 포함하면 360px 폭 기기에서 칩이 64px 밑으로 눌려
+   터치 영역 원칙이 깨져 3열로 선택 (터치 영역 64px 유지가 정렬 촘촘함보다 우선). */
+.p2-days-grid {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(var(--touch-min), 1fr));
+  gap: 8px;
+}
+.p2-chip--day { min-height: var(--touch-min); min-width: var(--touch-min); padding: 0; }

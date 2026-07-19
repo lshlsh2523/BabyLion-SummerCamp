@@ -125,21 +125,23 @@ export default function P2BasicInfo({ speak, speaking }) {
             </button>
           ))}
         </div>
-        <div className="p2-hours__row" role="group" aria-label="쉬는 요일">
+        <div className="p2-hours__row p2-hours__row--days" role="group" aria-label="쉬는 요일">
           <span className="p2-hours__label">쉬는 날</span>
-          {DAYS.map((d) => {
-            const days = basicInfo.hours?.closed_days ?? [];
-            const on = days.includes(d);
-            return (
-              <button key={d} className={`p2-chip p2-chip--day${on ? ' p2-chip--on' : ''}`}
-                      onClick={() => save({
-                        hours: { open: '09:00', close: '20:00', ...basicInfo.hours,
-                                 closed_days: on ? days.filter((x) => x !== d) : [...days, d] },
-                      })}>
-                {d}
-              </button>
-            );
-          })}
+          <div className="p2-days-grid">
+            {DAYS.map((d) => {
+              const days = basicInfo.hours?.closed_days ?? [];
+              const on = days.includes(d);
+              return (
+                <button key={d} className={`p2-chip p2-chip--day${on ? ' p2-chip--on' : ''}`}
+                        onClick={() => save({
+                          hours: { open: '09:00', close: '20:00', ...basicInfo.hours,
+                                   closed_days: on ? days.filter((x) => x !== d) : [...days, d] },
+                        })}>
+                  {d}
+                </button>
+              );
+            })}
+          </div>
         </div>
       </div>
     ),

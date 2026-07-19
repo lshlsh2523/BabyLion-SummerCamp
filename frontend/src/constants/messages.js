@@ -17,11 +17,14 @@ export const MESSAGES = {
   P1: {
     steps: [
       { key: 'signboard', title: '가게 *간판*을\n찍어주세요',   tts: '가게 간판을 찍어주세요.' },
+      { key: 'menuboard', title: '가게 *메뉴판*을\n찍어주세요', tts: '이번엔 가게 메뉴판을 찍어주세요.' },
       { key: 'menu',      title: '*대표 메뉴*를\n찍어주세요',   tts: '이제 대표 메뉴를 찍어주세요.' },
       { key: 'inside',    title: '가게 *안 모습*을\n찍어주세요', tts: '마지막으로 가게 안 모습을 찍어주세요.' },
     ],
+    doneLabels: ['간판', '메뉴판', '대표 메뉴', '가게 안'],
+    doneTitle: '사진 4장을 모두 찍었어요!',
+    doneTts: '사진 4장을 모두 찍었어요!',
     shootBtn: '사진 찍기',
-    retakeBtn: '다시 찍기',
     nextBtn: '다음',
     prevBtn: '이전',
   },

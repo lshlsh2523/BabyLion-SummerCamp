@@ -40,3 +40,10 @@
 
 /* P6 만세 */
 @keyframes cheer { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-7px); } }
+
+/* P1 촬영 완료 체크 아이콘 */
+@keyframes popIn {
+  0%   { transform: scale(0.4); opacity: 0; }
+  70%  { transform: scale(1.08); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
