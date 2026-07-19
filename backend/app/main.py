@@ -10,12 +10,14 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
-from .core import MEDIA_DIR, ApiError, api_error_handler, request_validation_handler
+from .core import (MEDIA_DIR, PRIVATE_DIR, ApiError, api_error_handler,
+                   request_validation_handler)
 from .db import Base, engine
 from .routers import answers, photos, stores
 
 Base.metadata.create_all(bind=engine)
 os.makedirs(MEDIA_DIR, exist_ok=True)
+os.makedirs(PRIVATE_DIR, exist_ok=True)
 
 app = FastAPI(title="BabyLion-SummerCamp API", version="0.1.0")
 
@@ -30,7 +32,8 @@ app.add_middleware(
 app.add_exception_handler(ApiError, api_error_handler)
 app.add_exception_handler(RequestValidationError, request_validation_handler)
 
-# 업로드 파일 서빙 — 응답 url은 /media/... 상대 경로, FE가 HOST를 붙인다 (명세서 0장)
+# 공개 파일(사진) 서빙 — 응답 url은 /media/... 상대 경로, FE가 HOST를 붙인다 (명세서 0장)
+# 음성 답변은 PRIVATE_DIR에 저장되어 여기서 서빙되지 않는다 (경로 추측 다운로드 차단)
 app.mount("/media", StaticFiles(directory=MEDIA_DIR), name="media")
 
 API_PREFIX = "/api/v1"
