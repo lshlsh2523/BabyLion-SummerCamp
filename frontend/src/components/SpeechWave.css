@@ -1,0 +1,31 @@
+.wave {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1.5px solid var(--border-soft);
+  border-radius: 99px;
+  padding: 7px 18px;
+  box-shadow: var(--shadow-capsule);
+}
+.wave--lg { gap: 12px; padding: 10px 24px; }
+
+.wave__icon { width: 17px; height: 17px; }
+.wave--lg .wave__icon { width: 22px; height: 22px; }
+
+.wave__bars { display: flex; align-items: center; gap: 4px; height: 20px; }
+.wave--lg .wave__bars { gap: 5px; height: 32px; }
+
+.wave__bar {
+  width: 5px;
+  height: 18px;              /* scaleY 기준 높이 */
+  border-radius: 99px;
+  transform: scaleY(0.35);   /* 대기 상태: 낮게 고정 */
+  transform-origin: center;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+  animation-play-state: paused;   /* 말하지 않을 땐 정지 */
+}
+.wave--lg .wave__bar { width: 6px; height: 28px; }
+
+.wave--active .wave__bar { animation-play-state: running; }

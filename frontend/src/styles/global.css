@@ -1,0 +1,35 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap');
+@import './tokens.css';
+@import './animations.css';
+
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+html, body, #root { height: 100%; }
+
+body {
+  margin: 0;
+  font-family: var(--font-family);
+  background: var(--bg-app);
+  color: var(--green-900);
+  /* 시니어 UX: 텍스트 길게 눌러 선택되는 혼란 방지 (상인 플로우 한정) */
+  user-select: none;
+}
+
+button {
+  font-family: inherit;
+  border: none;
+  background: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+/* 접근성: 키보드 포커스 가시화 */
+:focus-visible {
+  outline: 3px solid var(--green-600);
+  outline-offset: 2px;
+}
+
+/* 시안의 reduced-motion 정책 유지 */
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+}

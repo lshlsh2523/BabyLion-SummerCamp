@@ -1,0 +1,27 @@
+.big-btn {
+  width: 100%;
+  min-height: var(--touch-min);
+  border-radius: var(--radius-btn);
+  font-weight: var(--fw-bold);
+  font-size: var(--fs-btn);
+  letter-spacing: -0.3px;
+  transition: transform 0.08s ease;
+}
+.big-btn:active { transform: scale(0.98); }
+
+.big-btn--primary {
+  background: var(--grad-btn);
+  color: #fff;
+  box-shadow: var(--shadow-btn);
+}
+
+.big-btn--secondary {
+  background: #fff;
+  border: 2px solid var(--border-btn);
+  color: var(--green-sub);
+  font-weight: var(--fw-medium);
+  font-size: 20px;
+}
+
+/* 비활성 버튼은 원칙상 두지 않되, 불가피할 때 이유 표시와 함께 */
+.big-btn:disabled { opacity: 0.45; }

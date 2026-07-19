@@ -1,0 +1,12 @@
+.progress {
+  display: flex;
+  gap: 7px;
+  padding: 16px var(--space-page) 0;
+}
+.progress__seg {
+  flex: 1;
+  height: 12px;
+  border-radius: 99px;
+  background: var(--bg-track);
+}
+.progress__seg--done { background: var(--grad-progress); }

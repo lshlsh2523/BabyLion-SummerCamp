@@ -1,0 +1,65 @@
+.screen {
+  position: relative;
+  height: 100dvh;            /* 주소창 변동 대응. 스크롤 없는 한 화면 원칙 */
+  max-width: 480px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--bg-app);
+}
+.screen--lemon { background: var(--lemon-bg); }
+
+/* 분위기용 blob (기능색과 역할 분리) */
+.screen__blob {
+  position: absolute;
+  width: 340px;
+  height: 340px;
+  border-radius: 50%;
+  pointer-events: none;
+}
+.screen__blob--tr {
+  top: -140px; right: -140px;
+  background: radial-gradient(circle, rgba(255, 244, 94, 0.26) 0%, rgba(255, 244, 94, 0) 68%);
+}
+.screen__blob--bl {
+  bottom: -150px; left: -140px;
+  background: radial-gradient(circle, rgba(139, 213, 67, 0.16) 0%, rgba(139, 213, 67, 0) 68%);
+}
+
+.screen__title {
+  position: relative;
+  margin: clamp(20px, 5dvh, 44px) var(--space-page) 0;
+  font-size: clamp(24px, 6.5vw, var(--fs-title));
+  font-weight: var(--fw-bold);
+  line-height: 1.4;
+  text-align: center;
+  color: var(--green-900);
+}
+.screen__title-line { display: block; }
+.screen__title em { font-style: normal; color: var(--green-700); }
+
+.screen__body {
+  position: relative;
+  flex: 1;
+  min-height: 0;             /* 작은 기기에서 본문이 유연하게 줄도록 */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0 var(--space-page);
+}
+
+.screen__wave {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  padding-bottom: 12px;
+}
+
+.screen__actions {
+  position: relative;
+  display: flex;
+  gap: 10px;
+  padding: 0 var(--space-page) max(28px, env(safe-area-inset-bottom));
+}

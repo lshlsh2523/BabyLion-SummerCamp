@@ -1,0 +1,31 @@
+/* P3 말풍선 */
+.illust-talking { position: relative; display: inline-block; }
+.illust-talking__bubble {
+  position: absolute;
+  left: 124px; top: 16px;
+  width: 88px; height: 60px;
+  background: var(--bg-box);
+  border: 2.5px solid #A9D573;
+  border-radius: 22px;
+  border-bottom-left-radius: 6px;
+  box-shadow: 0 6px 16px rgba(120, 170, 60, 0.16);
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+.illust-talking__bubble span {
+  width: 10px; height: 10px; border-radius: 50%;
+  background: #6DBE3C;
+  animation: dotpulse 1.2s ease-in-out infinite;
+}
+.illust-talking__bubble span:nth-child(2) { animation-delay: 0.2s; }
+.illust-talking__bubble span:nth-child(3) { animation-delay: 0.4s; }
+
+/* P4 흔들의자 */
+.illust-rocking { position: relative; display: inline-block; }
+.illust-rocking__chair { animation: rock 2.6s ease-in-out infinite; transform-origin: 85px 150px; }
+.illust-rocking__spark { position: absolute; animation: floaty 2.2s ease-in-out infinite; }
+.illust-rocking__spark--star { top: -8px; right: -16px; }
+.illust-rocking__spark--dot  { top: 26px; left: -22px; animation-duration: 2.8s; animation-delay: 0.6s; }
+
+/* P6 만세 + 색종이 */
+.illust-cheer { position: relative; display: inline-block; animation: cheer 1.8s ease-in-out infinite; }
+.illust-cheer__confetti { position: absolute; animation-name: confetti; animation-timing-function: ease-in; animation-iteration-count: infinite; }

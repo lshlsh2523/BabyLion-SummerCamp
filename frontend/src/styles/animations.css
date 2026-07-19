@@ -1,0 +1,42 @@
+/* ============================================
+   시안 키프레임 전체 이식.
+   변경점: eq 파형은 height → transform:scaleY
+   (레이아웃 리플로우 제거, 시각 결과 동일)
+   ============================================ */
+
+/* 마이크 버튼 물결 링 */
+@keyframes ripple  { 0% { transform: scale(1);   opacity: 0.4;  } 100% { transform: scale(1.5); opacity: 0; } }
+@keyframes rippleS { 0% { transform: scale(1);   opacity: 0.45; } 100% { transform: scale(1.9); opacity: 0; } }
+
+/* 말풍선 점 3개 */
+@keyframes dotpulse {
+  0%, 100% { opacity: 0.35; transform: translateY(0); }
+  50%      { opacity: 1;    transform: translateY(-3px); }
+}
+
+/* TTS 파형 바 — scaleY 버전 (기준 높이는 컴포넌트에서 지정) */
+@keyframes eq1  { 0%, 100% { transform: scaleY(0.4); } 50% { transform: scaleY(1.0); } }
+@keyframes eq2  { 0%, 100% { transform: scaleY(0.6); } 50% { transform: scaleY(1.0); } }
+@keyframes eq3  { 0%, 100% { transform: scaleY(1.0); } 50% { transform: scaleY(0.4); } }
+@keyframes eq4  { 0%, 100% { transform: scaleY(0.5); } 50% { transform: scaleY(1.0); } }
+
+/* P4 흔들의자 */
+@keyframes rock { 0%, 100% { transform: rotate(-3.5deg); } 50% { transform: rotate(3.5deg); } }
+
+/* 로딩 점 */
+@keyframes loaddot {
+  0%, 100% { opacity: 0.25; transform: scale(0.85); }
+  50%      { opacity: 1;    transform: scale(1.15); }
+}
+
+/* 반짝이 부유 */
+@keyframes floaty { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+
+/* P6 색종이 */
+@keyframes confetti {
+  0%   { transform: translateY(-4px) rotate(0deg);   opacity: 1; }
+  100% { transform: translateY(26px) rotate(180deg); opacity: 0; }
+}
+
+/* P6 만세 */
+@keyframes cheer { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-7px); } }

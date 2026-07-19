@@ -1,0 +1,55 @@
+/* ============================================
+   디자인 토큰 — 상인플로우_UI시안_최종본.html 기준
+   상인 플로우(P0~P6) 전용. PUB 테마 변수는
+   pages/public/themes/themes.css 에 별도 스코프.
+   ============================================ */
+:root {
+  /* ---- 컬러: 초록 = 기능, 노랑 = 분위기 (역할 분리) ---- */
+  --green-900: #1E4D0E;   /* 화면 타이틀 */
+  --green-700: #3E9B1F;   /* 타이틀 강조어 */
+  --green-600: #4CB427;   /* 주 기능색 (버튼 그라데이션 끝) */
+  --green-icon: #4CA324;  /* 아이콘 */
+  --green-sub: #6B8F42;   /* 보조 버튼 라벨 */
+  --green-text-sub: #5E8A2E; /* 카드 보조 텍스트 */
+
+  --lemon-300: #FFF45E;   /* 분위기 blob */
+  --lemon-bg: #FFF9CF;    /* 스플래시 배경 */
+  --yellow-400: #FFD93B;  /* 파형 포인트 */
+
+  --border-soft: #D8EEBB;
+  --border-btn: #C9E2AC;
+  --border-select: #D4E8BC;
+
+  --bg-app: #FFFFFF;
+  --bg-card: #FDFEF8;
+  --bg-box: #FAFDF3;
+  --bg-track: #EEF4E3;    /* 진행 바 트랙 */
+
+  /* ---- 그라데이션 ---- */
+  --grad-btn: linear-gradient(105deg, #C9F14E 0%, #7ED03C 50%, #4CB427 100%);
+  --grad-progress: linear-gradient(90deg, #A9E05C, #4CB427);
+  --grad-select: linear-gradient(115deg, #A9E05C, #4CB427);
+
+  /* ---- 그림자 ---- */
+  --shadow-btn: 0 8px 22px rgba(101, 193, 53, 0.30);
+  --shadow-card: 0 8px 24px rgba(120, 170, 60, 0.12);
+  --shadow-capsule: 0 6px 18px rgba(101, 193, 53, 0.18);
+
+  /* ---- 타이포 (수행일지 확정: 본문 22px+ / 버튼 23px+) ---- */
+  --font-family: 'Noto Sans KR', sans-serif;
+  --fs-title: 27px;       /* 화면 타이틀 */
+  --fs-body: 22px;        /* 본문 최소 */
+  --fs-btn: 23px;         /* 주 버튼 라벨 */
+  --fs-btn-lg: 24px;
+  --fs-sub: 17px;         /* 카드 내 스토리 등 보조 */
+  --fw-medium: 500;       /* 얇은 굵기(300 이하) 사용 금지 */
+  --fw-bold: 700;
+
+  /* ---- 터치·간격 ---- */
+  --touch-min: 64px;      /* 터치 영역 최소 */
+  --touch-select: 88px;   /* P2 대형 선택 버튼 */
+  --radius-btn: 18px;
+  --radius-card: 24px;
+  --radius-box: 16px;
+  --space-page: 20px;     /* 화면 좌우 여백 */
+}

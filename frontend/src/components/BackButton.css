@@ -1,0 +1,16 @@
+.back-btn {
+  width: 86px;
+  min-height: var(--touch-min);
+  background: #fff;
+  border: 2px solid var(--border-btn);
+  border-radius: var(--radius-btn);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  color: var(--green-sub);
+  font-size: 14px;
+  font-weight: var(--fw-medium);
+  flex-shrink: 0;
+}
