@@ -15,6 +15,9 @@ from fastapi.responses import JSONResponse
 
 # ---------------------------------------------------------------- 설정
 MEDIA_DIR = os.environ.get("MEDIA_DIR", os.path.join(os.getcwd(), "media"))
+# 음성 답변 등 비공개 파일 저장소 — /media처럼 정적 서빙하지 않는다.
+# 발행 후 store_id가 공개되므로, 서빙 경로에 두면 URL 추측만으로 다운로드가 가능해진다.
+PRIVATE_DIR = os.environ.get("PRIVATE_DIR", os.path.join(os.getcwd(), "private"))
 DATABASE_URL = os.environ.get("DATABASE_URL", "sqlite:///./babylion.db")
 
 PHOTO_MAX_COUNT = 5

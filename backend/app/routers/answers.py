@@ -10,7 +10,7 @@ from fastapi import APIRouter, Depends, File, Form, UploadFile
 from sqlalchemy.orm import Session
 
 from ..core import (AUDIO_FORMATS, AUDIO_MAX_BYTES, AUDIO_MAX_SECONDS,
-                    MEDIA_DIR, QUESTION_NOS, ApiError, audio_duration_seconds,
+                    PRIVATE_DIR, QUESTION_NOS, ApiError, audio_duration_seconds,
                     edit_token_header, file_ext, require_token,
                     validation_error)
 from ..db import Answer, get_db
@@ -50,7 +50,8 @@ def upload_answer(
     if len(data) > AUDIO_MAX_BYTES:
         raise ApiError(413, "FILE_TOO_LARGE", "음성 파일은 최대 15MB입니다.")
 
-    directory = os.path.join(MEDIA_DIR, "answers", store_id)
+    # 비공개 저장소(PRIVATE_DIR) — /media 정적 서빙 대상이 아니라 URL 추측으로 접근 불가
+    directory = os.path.join(PRIVATE_DIR, "answers", store_id)
     os.makedirs(directory, exist_ok=True)
     path = os.path.join(directory, f"q{qno}.{ext}")
     with open(path, "wb") as f:

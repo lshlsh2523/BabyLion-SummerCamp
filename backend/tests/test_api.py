@@ -15,6 +15,7 @@ import pytest
 # 테스트 전용 DB/미디어 경로를 import 전에 주입
 _tmp = tempfile.mkdtemp(prefix="babylion_test_")
 os.environ["MEDIA_DIR"] = os.path.join(_tmp, "media")
+os.environ["PRIVATE_DIR"] = os.path.join(_tmp, "private")
 os.environ["DATABASE_URL"] = f"sqlite:///{os.path.join(_tmp, 'test.db')}"
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -241,3 +242,24 @@ def test_answer_too_long_422():
                     data={"question_no": "3"},
                     files={"file": ("long.wav", wav_bytes(seconds=91), "audio/wav")})
     assert r.status_code == 422 and err_code(r) == "AUDIO_TOO_LONG"
+
+
+def test_answer_audio_not_publicly_served():
+    """보안 회귀 테스트: 음성 파일은 /media 경로 추측으로 내려받을 수 없어야 한다.
+
+    발행 후 store_id가 공개(/s/{store_id})되므로, 음성이 /media 하위에 있으면
+    q1~q3 x 확장자 조합만으로 토큰 없이 다운로드 가능해진다 (명세 6.2 취지 위반).
+    """
+    store_id, token = make_store()
+    r = client.post(f"{V}/stores/{store_id}/answers",
+                    headers={"X-Edit-Token": token},
+                    data={"question_no": "1"},
+                    files={"file": ("q1.wav", wav_bytes(), "audio/wav")})
+    assert r.status_code == 201
+
+    # 예전 취약 경로로 접근 시도 -> 서빙되지 않아야 함
+    assert client.get(f"/media/answers/{store_id}/q1.wav").status_code == 404
+
+    # 파일은 비공개 저장소(PRIVATE_DIR)에 실제로 존재
+    assert os.path.exists(
+        os.path.join(os.environ["PRIVATE_DIR"], "answers", store_id, "q1.wav"))
