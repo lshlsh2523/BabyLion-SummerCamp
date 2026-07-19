@@ -1,0 +1,31 @@
+/* ============================================
+   PUB 테마 3종 — CSS 변수 스코프 (theme_id 클래스만 교체하면 전환)
+   상인 플로우 토큰(:root)과 분리 — 디자인 시스템 2원화
+   ============================================ */
+.pub-theme-warm_old {          /* 따뜻한 노포 */
+  --pub-bg: #FBF6EC;
+  --pub-surface: #FFFFFF;
+  --pub-ink: #4A382A;
+  --pub-sub: #8A7460;
+  --pub-accent: #B4713D;
+  --pub-tag-bg: #F3E8D8;
+  --pub-font: 'Noto Serif KR', serif;
+}
+.pub-theme-neat_korean {       /* 정갈한 한식 */
+  --pub-bg: #FFFFFF;
+  --pub-surface: #F7FAF7;
+  --pub-ink: #1F3A2D;
+  --pub-sub: #5D7466;
+  --pub-accent: #17573C;
+  --pub-tag-bg: #EAF2EC;
+  --pub-font: 'Noto Sans KR', sans-serif;
+}
+.pub-theme-trendy_alley {      /* 트렌디 골목 */
+  --pub-bg: #191B17;
+  --pub-surface: #24271F;
+  --pub-ink: #F2F4E8;
+  --pub-sub: #A9B098;
+  --pub-accent: #C9F14E;
+  --pub-tag-bg: #31352A;
+  --pub-font: 'Noto Sans KR', sans-serif;
+}

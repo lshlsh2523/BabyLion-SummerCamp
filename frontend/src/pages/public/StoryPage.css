@@ -1,0 +1,51 @@
+.pub {
+  min-height: 100dvh;
+  max-width: 480px;
+  margin: 0 auto;
+  background: var(--pub-bg);
+  color: var(--pub-ink);
+  font-family: var(--pub-font);
+  padding-bottom: 48px;
+  user-select: text;                /* 소비자 페이지는 텍스트 선택 허용 */
+}
+.pub--empty {
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; color: #888; background: #fff;
+}
+
+.pub__hero { position: relative; }
+.pub__hero-img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; display: block; }
+.pub__title {
+  margin: 0;
+  padding: 22px 20px 6px;
+  font-size: 26px;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.pub__info { padding: 10px 20px; }
+.pub__info dl {
+  margin: 0;
+  background: var(--pub-surface);
+  border-radius: 16px;
+  padding: 16px 18px;
+  display: flex; flex-direction: column; gap: 10px;
+}
+.pub__info dl > div { display: flex; gap: 12px; }
+.pub__info dt { width: 74px; flex-shrink: 0; font-size: 15px; color: var(--pub-sub); }
+.pub__info dd { margin: 0; font-size: 16px; font-weight: 500; }
+
+.pub__story { padding: 14px 20px 0; }
+.pub__story p { margin: 0 0 14px; font-size: 17px; line-height: 1.75; }
+
+.pub__tags { display: flex; gap: 8px; flex-wrap: wrap; padding: 4px 20px 0; }
+.pub__tags span {
+  font-size: 14px;
+  color: var(--pub-accent);
+  background: var(--pub-tag-bg);
+  border-radius: 99px;
+  padding: 5px 12px;
+}
+
+.pub__gallery { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; padding: 18px 20px 0; }
+.pub__gallery img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 12px; }
