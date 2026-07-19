@@ -1,0 +1,34 @@
+.p3-rec { margin-top: 22px; min-height: 160px; display: flex; align-items: center; justify-content: center; }
+
+.p3-rec__wrap {
+  position: relative;
+  width: 148px; height: 148px;
+  display: flex; align-items: center; justify-content: center;
+}
+.p3-rec__ring {
+  position: absolute; inset: 0;
+  border-radius: 50%;
+  border: 2px solid #7ED03C;
+  animation: ripple 1.7s ease-out infinite;
+}
+.p3-rec__ring--late { animation-delay: 0.55s; }
+
+.p3-rec__btn {
+  width: 126px; height: 126px;
+  border-radius: 50%;
+  background: var(--grad-select);
+  box-shadow: 0 12px 30px rgba(101, 193, 53, 0.38);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+  color: #fff;
+  font-size: 16px;
+  font-weight: var(--fw-bold);
+}
+.p3-rec__btn--on { background: linear-gradient(135deg, #FFB84D, #E8862B); box-shadow: 0 12px 30px rgba(232, 134, 43, 0.38); }
+
+.p3-rec__status {
+  margin: 0;
+  font-size: var(--fs-body);
+  font-weight: var(--fw-medium);
+  color: var(--green-sub);
+}
+.p3-rec__status--done { color: var(--green-700); font-weight: var(--fw-bold); }

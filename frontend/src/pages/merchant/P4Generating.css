@@ -1,0 +1,9 @@
+.p4-dots { display: flex; gap: 12px; margin-top: 30px; }
+.p4-dots span {
+  width: 16px; height: 16px;
+  border-radius: 50%;
+  animation: loaddot 1.3s ease-in-out infinite;
+}
+.p4-dots span:nth-child(1) { background: #8BD543; }
+.p4-dots span:nth-child(2) { background: var(--yellow-400); animation-delay: 0.2s; }
+.p4-dots span:nth-child(3) { background: var(--green-600);  animation-delay: 0.4s; }

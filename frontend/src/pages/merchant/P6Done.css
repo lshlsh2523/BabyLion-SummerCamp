@@ -1,0 +1,15 @@
+.p6-link {
+  margin-top: 24px;
+  max-width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--bg-box);
+  border: 2px solid var(--border-soft);
+  border-radius: var(--radius-box);
+  padding: 14px 16px;
+  font-size: 16px;
+  font-weight: var(--fw-medium);
+  color: var(--green-text-sub);
+}
+.p6-link span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

@@ -1,0 +1,92 @@
+/* ① 창업연도 2×2 대형 버튼 */
+.p2-grid {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.p2-option {
+  min-height: var(--touch-select);
+  background: #fff;
+  border: 2.5px solid var(--border-select);
+  border-radius: 20px;
+  font-size: var(--fs-btn-lg);
+  font-weight: var(--fw-bold);
+  color: var(--green-text-sub);
+}
+.p2-option--on {
+  background: var(--grad-select);        /* 선택 = 명도 반전 (색 단독 의존 X) */
+  border-color: var(--green-600);
+  color: #fff;
+  box-shadow: 0 8px 20px rgba(101, 193, 53, 0.30);
+}
+
+/* ② 대표 메뉴 음성 */
+.p2-menu { display: flex; flex-direction: column; align-items: center; gap: 26px; }
+.p2-menu__hint, .p2-menu__value {
+  margin: 0;
+  font-size: var(--fs-body);
+  font-weight: var(--fw-medium);
+  color: var(--green-sub);
+  text-align: center;
+  white-space: pre-line;
+}
+.p2-menu__value { color: var(--green-900); font-weight: var(--fw-bold); font-size: 26px; }
+.p2-mic {
+  width: 126px; height: 126px;
+  border-radius: 50%;
+  background: var(--grad-select);
+  box-shadow: 0 12px 30px rgba(101, 193, 53, 0.38);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+  color: #fff; font-size: 16px; font-weight: var(--fw-bold);
+}
+
+/* ③ 가격 키패드 */
+.p2-price { width: 100%; display: flex; flex-direction: column; gap: 14px; }
+.p2-price__display {
+  margin: 0;
+  min-height: 44px;
+  font-size: 32px;
+  font-weight: var(--fw-bold);
+  color: var(--green-900);
+  text-align: center;
+}
+.p2-keypad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.p2-key {
+  min-height: 58px;
+  background: #fff;
+  border: 2px solid var(--border-select);
+  border-radius: 14px;
+  font-size: 24px;
+  font-weight: var(--fw-bold);
+  color: var(--green-text-sub);
+}
+.p2-key:active { background: var(--bg-box); }
+
+/* ④ 영업시간 */
+.p2-hours { width: 100%; display: flex; flex-direction: column; gap: 16px; }
+.p2-hours__row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.p2-hours__label {
+  width: 78px;
+  font-size: 19px;
+  font-weight: var(--fw-bold);
+  color: var(--green-900);
+  flex-shrink: 0;
+}
+.p2-chip {
+  min-height: 52px;
+  padding: 0 16px;
+  background: #fff;
+  border: 2px solid var(--border-select);
+  border-radius: 14px;
+  font-size: 20px;
+  font-weight: var(--fw-medium);
+  color: var(--green-text-sub);
+}
+.p2-chip--day { min-width: 52px; padding: 0; }
+.p2-chip--on {
+  background: var(--grad-select);
+  border-color: var(--green-600);
+  color: #fff;
+  font-weight: var(--fw-bold);
+}

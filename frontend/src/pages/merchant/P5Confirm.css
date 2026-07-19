@@ -1,0 +1,36 @@
+.p5-card {
+  width: 100%;
+  background: var(--bg-card);
+  border: 2.5px solid var(--border-soft);
+  border-radius: var(--radius-card);
+  padding: 22px 20px;
+  box-shadow: var(--shadow-card);
+  overflow-y: auto;        /* 예외적으로 카드 내부만 스크롤 허용 (작은 기기 대비) */
+  max-height: 100%;
+}
+.p5-card__title {
+  margin: 0;
+  font-size: 21px;
+  font-weight: var(--fw-bold);
+  color: #2A5510;
+  line-height: 1.5;
+  text-align: center;
+}
+.p5-card__divider { height: 2px; background: #EAF3DC; margin: 14px 0; }
+.p5-card__tags { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; }
+.p5-card__tags span {
+  font-size: 15px;
+  font-weight: var(--fw-medium);
+  color: var(--green-700);
+  background: #EFF8E2;
+  border-radius: 99px;
+  padding: 5px 12px;
+}
+.p5-card__line {
+  margin: 18px 0 0;
+  font-size: 18px;
+  font-weight: var(--fw-medium);
+  color: #4A701C;
+  line-height: 1.6;
+}
+.p5-actions { display: flex; flex-direction: column; gap: 10px; width: 100%; }
