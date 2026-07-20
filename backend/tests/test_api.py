@@ -24,6 +24,8 @@ from fastapi.testclient import TestClient  # noqa: E402
 from PIL import Image  # noqa: E402
 
 from app.main import app  # noqa: E402
+from app.db import GenerationJob, SessionLocal  # noqa: E402
+from app.routers import answers as answers_router  # noqa: E402
 
 client = TestClient(app)
 V = "/api/v1"
@@ -55,6 +57,47 @@ def wav_bytes(seconds=1.0, rate=8000):
 
 def err_code(response):
     return response.json()["error"]["code"]
+
+
+def make_generation_ready_store():
+    store_id, token = make_store()
+    headers = {"X-Edit-Token": token}
+    assert client.put(
+        f"{V}/stores/{store_id}/basic-info",
+        headers=headers,
+        json={"main_menu": "test menu", "price": 9000},
+    ).status_code == 200
+    for number in range(3):
+        assert client.post(
+            f"{V}/stores/{store_id}/photos",
+            headers=headers,
+            files={"file": (f"p{number}.png", png_bytes(), "image/png")},
+        ).status_code == 201
+        assert client.post(
+            f"{V}/stores/{store_id}/answers",
+            headers=headers,
+            data={"question_no": str(number + 1)},
+            files={"file": (f"q{number}.wav", wav_bytes(), "audio/wav")},
+        ).status_code == 201
+    return store_id, headers
+
+
+async def fake_generation(job_id: str, store_id: str):
+    db = SessionLocal()
+    try:
+        job = db.get(GenerationJob, job_id)
+        store = job.store
+        store.story = {
+            "title": "Test story",
+            "story_lines": ["one", "two", "three"],
+            "hashtags": ["#test"],
+            "theme_id": "warm",
+            "quoted_sentence": "test quote",
+        }
+        job.status = "done"
+        db.commit()
+    finally:
+        db.close()
 
 
 # ---------------------------------------------------------------- 이슈 #1
@@ -263,3 +306,82 @@ def test_answer_audio_not_publicly_served():
     # 파일은 비공개 저장소(PRIVATE_DIR)에 실제로 존재
     assert os.path.exists(
         os.path.join(os.environ["PRIVATE_DIR"], "answers", store_id, "q1.wav"))
+
+
+def test_answer_reupload_failure_preserves_existing_file(monkeypatch):
+    store_id, token = make_store()
+    headers = {"X-Edit-Token": token}
+    first = wav_bytes(seconds=1)
+    assert client.post(
+        f"{V}/stores/{store_id}/answers",
+        headers=headers,
+        data={"question_no": "1"},
+        files={"file": ("q1.wav", first, "audio/wav")},
+    ).status_code == 201
+    path = os.path.join(os.environ["PRIVATE_DIR"], "answers", store_id, "q1.wav")
+
+    def fail_transcribe(*_args):
+        raise RuntimeError("STT failed")
+
+    monkeypatch.setattr(answers_router, "transcribe", fail_transcribe)
+    with pytest.raises(RuntimeError, match="STT failed"):
+        client.post(
+            f"{V}/stores/{store_id}/answers",
+            headers=headers,
+            data={"question_no": "1"},
+            files={"file": ("q1.wav", wav_bytes(seconds=2), "audio/wav")},
+        )
+    with open(path, "rb") as saved:
+        assert saved.read() == first
+
+
+def test_generation_preconditions_and_authenticated_job(monkeypatch):
+    store_id, token = make_store()
+    headers = {"X-Edit-Token": token}
+    assert client.post(f"{V}/stores/{store_id}/generate", headers=headers).status_code == 400
+
+    monkeypatch.setattr("app.routers.generation.run_llm_generation_workflow", fake_generation)
+    store_id, headers = make_generation_ready_store()
+    generated = client.post(f"{V}/stores/{store_id}/generate", headers=headers)
+    assert generated.status_code == 202
+    job_id = generated.json()["job_id"]
+    assert client.get(f"{V}/jobs/{job_id}").status_code == 403
+    status_response = client.get(f"{V}/jobs/{job_id}", headers=headers)
+    assert status_response.status_code == 200 and status_response.json()["status"] == "done"
+
+    assert client.post(f"{V}/stores/{store_id}/publish", headers=headers).status_code == 200
+    public = client.get(f"{V}/public/stores/{store_id}")
+    assert public.status_code == 200 and len(public.json()["photos"]) == 3
+
+
+def test_generation_retry_limit(monkeypatch):
+    monkeypatch.setattr("app.routers.generation.run_llm_generation_workflow", fake_generation)
+    store_id, headers = make_generation_ready_store()
+    for _ in range(5):
+        assert client.post(f"{V}/stores/{store_id}/generate?retry=true", headers=headers).status_code == 202
+    limited = client.post(f"{V}/stores/{store_id}/generate?retry=true", headers=headers)
+    assert limited.status_code == 409 and err_code(limited) == "LIMIT_EXCEEDED"
+
+
+def test_generation_rejects_an_active_job():
+    store_id, headers = make_generation_ready_store()
+    db = SessionLocal()
+    try:
+        db.add(GenerationJob(store_id=store_id, status="processing"))
+        db.commit()
+    finally:
+        db.close()
+    response = client.post(f"{V}/stores/{store_id}/generate", headers=headers)
+    assert response.status_code == 409 and err_code(response) == "GENERATION_IN_PROGRESS"
+
+
+def test_audio_without_a_verifiable_duration_is_rejected(monkeypatch):
+    store_id, token = make_store()
+    monkeypatch.setattr(answers_router, "audio_duration_seconds", lambda _path: None)
+    response = client.post(
+        f"{V}/stores/{store_id}/answers",
+        headers={"X-Edit-Token": token},
+        data={"question_no": "1"},
+        files={"file": ("q1.webm", b"audio", "audio/webm")},
+    )
+    assert response.status_code == 503 and err_code(response) == "AUDIO_DURATION_UNAVAILABLE"

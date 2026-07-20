@@ -8,20 +8,29 @@ import os
 import re
 import shutil
 import subprocess
+import wave
 from datetime import datetime
+from pathlib import Path
 
 from fastapi import Header
 from fastapi.responses import JSONResponse
 
 # ---------------------------------------------------------------- 설정
-MEDIA_DIR = os.environ.get("MEDIA_DIR", os.path.join(os.getcwd(), "media"))
+BASE_DIR = Path(__file__).resolve().parents[1]
+MEDIA_DIR = os.environ.get("MEDIA_DIR", str(BASE_DIR / "media"))
 # 음성 답변 등 비공개 파일 저장소 — /media처럼 정적 서빙하지 않는다.
 # 발행 후 store_id가 공개되므로, 서빙 경로에 두면 URL 추측만으로 다운로드가 가능해진다.
-PRIVATE_DIR = os.environ.get("PRIVATE_DIR", os.path.join(os.getcwd(), "private"))
-DATABASE_URL = os.environ.get("DATABASE_URL", "sqlite:///./babylion.db")
+PRIVATE_DIR = os.environ.get("PRIVATE_DIR", str(BASE_DIR / "private"))
+DATABASE_URL = os.environ.get("DATABASE_URL", f"sqlite:///{(BASE_DIR / 'babylion.db').as_posix()}")
+CORS_ORIGINS = [
+    origin.strip()
+    for origin in os.environ.get("CORS_ORIGINS", "http://localhost:5173,http://127.0.0.1:5173").split(",")
+    if origin.strip()
+]
 
 PHOTO_MAX_COUNT = 5
 PHOTO_MAX_BYTES = 10 * 1024 * 1024          # 10MB
+PHOTO_MAX_PIXELS = 40_000_000
 PHOTO_FORMATS = {"jpg", "jpeg", "png", "webp"}
 PHOTO_RESIZE_LONG_EDGE = 1600
 
@@ -136,7 +145,7 @@ def file_ext(filename: str | None) -> str:
     return filename.rsplit(".", 1)[1].lower()
 
 
-def audio_duration_seconds(path: str) -> float | None:
+def _ffprobe_duration_seconds(path: str) -> float | None:
     """ffprobe로 재생 길이 측정. ffprobe가 없으면 None(검증 스킵)."""
     if shutil.which("ffprobe") is None:
         return None
@@ -148,4 +157,18 @@ def audio_duration_seconds(path: str) -> float | None:
         )
         return float(out.stdout.strip())
     except Exception:
+        return None
+
+
+def audio_duration_seconds(path: str) -> float | None:
+    """Return duration, using WAV parsing when ffprobe is unavailable."""
+    duration = _ffprobe_duration_seconds(path)
+    if duration is not None:
+        return duration
+    if file_ext(path) != "wav":
+        return None
+    try:
+        with wave.open(path, "rb") as audio:
+            return audio.getnframes() / audio.getframerate()
+    except (wave.Error, OSError, ZeroDivisionError):
         return None
