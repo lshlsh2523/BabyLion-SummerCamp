@@ -1,37 +1,45 @@
+import { useState } from 'react';
 import { mediaUrl } from '../../../api/client';
 import bg from '../../../assets/themes/warm_old/warm-old-bg.jpg';
 import './WarmOldPage.css';
 
 /**
- * PUB · warm_old — 디자이너 export 배경(Figma Frame 108, 텍스트·사진 제거본) 위에
+ * PUB · warm_old — 디자이너 export 배경(Figma Frame, 텍스트·사진 제거본) 위에
  * 데이터 텍스트/사진을 절대좌표로 얹는 오버레이 방식.
  *
- * 좌표계: export 원본 804×1748(2x) 픽셀 기준. SLOTS의 [x, y, w, h]를
- * %와 cqw로 환산해 어떤 화면 폭에서도 배경과 같은 비율로 스케일된다.
+ * 좌표계: 배경 이미지 804×1688(2x) 픽셀 기준.
+ *   ⚠ 원본 export(804×1748)에서 상단 여백 60px(y 48~108)을 스플라이스로 제거한 상태.
+ *     배경을 재-export하면 splice를 다시 적용하거나 아래 SLOTS 전체 y+60 할 것.
+ * SLOTS의 [x, y, w, h]를 %와 cqw로 환산해 어떤 폭에서도 배경과 같은 비율로 스케일.
  * 위치가 어긋나면 SLOTS 숫자만 조정하면 됨. `?debug` 쿼리로 슬롯 외곽선 표시.
  *
  * [스키마 매핑 — 팀 협의 전 임시]
  * - title "헤드카피, 가게명"을 마지막 쉼표로 분리 (splitTitle)
  * - contact/address: 스키마에 없어 비면 괘선이 빈 줄로 노출됨 → 수집 여부 팀 논의
+ * - 즐겨찾기: 로컬 상태만 토글 (저장 API 없음 → 백엔드 협의 필요)
  */
-const W = 804, H = 1748;
+const W = 804, H = 1688;
 
 const SLOTS = {
-  hero:     [206, 192, 548, 386],
-  name:     [30, 595, 430, 105],
-  category: [30, 722, 430, 58],
-  contact:  [30, 800, 430, 62],
-  address:  [30, 886, 440, 56],
-  note:     [500, 700, 272, 320],
-  stamp:    [118, 902, 194, 194],
-  headline: [40, 1072, 724, 72],
-  vMenu:    [60, 1248, 172, 62],
-  vPrice:   [290, 1248, 172, 62],
-  vTime:    [518, 1240, 252, 58],
-  vClosed:  [518, 1296, 252, 40],
-  tags:     [[95, 1352, 172, 58], [305, 1352, 166, 58], [515, 1352, 192, 58]],
-  gallery:  [[30, 1444, 186, 206], [224, 1444, 186, 206], [418, 1444, 186, 206], [612, 1444, 186, 206]],
-  cta:      [30, 1660, 745, 70],
+  back:     [28, 30, 84, 84],
+  fav:      [692, 30, 84, 84],
+  hero:     [206, 132, 548, 386],
+  name:     [30, 535, 430, 105],
+  category: [30, 662, 430, 58],
+  contact:  [30, 740, 430, 62],
+  address:  [30, 826, 440, 56],
+  note:     [486, 662, 250, 258],   // 메모지 안쪽 (찢어진 가장자리 여백 확보, 우상단 클립 회피)
+  stamp:    [132, 848, 152, 152],
+  headline: [40, 1012, 724, 72],
+  vMenu:    [36, 1198, 200, 56],    // 대표메뉴 카드 중심(x≈136)에 맞춤
+  vPrice:   [290, 1198, 170, 56],
+  vTime:    [533, 1194, 216, 50],   // 영업시간 카드 중심(x≈640)에 맞춤
+  vClosed:  [533, 1244, 216, 34],
+  // 알약(해시태그) 외곽선 픽셀 검출값: y 1362~1427(원본) → 스플라이스 후 -60
+  tags:     [[95, 1302, 172, 65], [305, 1302, 166, 65], [515, 1302, 199, 65]],
+  gallery:  [[30, 1384, 177, 184], [219, 1384, 177, 184], [408, 1384, 177, 184], [597, 1384, 177, 184]],
+  // CTA 버튼 픽셀 검출값: y 1648~1727(원본) → -60
+  cta:      [34, 1588, 740, 80],
 };
 
 const box = ([x, y, w, h]) => ({
@@ -70,75 +78,98 @@ export default function WarmOldPage({ store }) {
   const closed = info.hours
     ? (info.hours.closed_days?.length ? `(매주 ${info.hours.closed_days.join('·')} 휴무)` : '(연중무휴)')
     : null;
+  const [faved, setFaved] = useState(false);
 
+  // 수집 사진 4장(간판·메뉴판·가게 안·대표 메뉴): 간판(첫 장)은 대표 자리에,
+  // 하단 갤러리에는 4장 전부 노출 (Figma 시안의 4칸 갤러리)
   const photos = [...store.photos].sort((a, b) => a.sort_order - b.sort_order);
-  const [hero, ...gallery] = photos;
+  const hero = photos[0];
+  const gallery = photos.slice(0, 4);
   const debug = typeof window !== 'undefined' && window.location.search.includes('debug');
 
   const mapHref = `https://map.naver.com/p/search/${encodeURIComponent(storeName)}`; // TODO: 지도 기능 협의
+  const goBack = () => (window.history.length > 1 ? window.history.back() : window.location.assign('/'));
 
   return (
-    <div className={`wob${debug ? ' wob--debug' : ''}`}>
-      <img className="wob__bg" src={bg} alt="" draggable="false" />
+    <div className="wob-page">
+      <div className={`wob${debug ? ' wob--debug' : ''}`}>
+        <img className="wob__bg" src={bg} alt="" draggable="false" />
 
-      {hero && (
-        <img className="wob__hero" style={box(SLOTS.hero)}
-             src={mediaUrl(hero.url)} alt={`${storeName} 대표 사진`} />
-      )}
+        <button type="button" className="wob__iconbtn" style={box(SLOTS.back)}
+                onClick={goBack} aria-label="뒤로 가기">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" strokeWidth="2.4"
+                  strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </button>
+        <button type="button" className={`wob__iconbtn${faved ? ' is-on' : ''}`} style={box(SLOTS.fav)}
+                onClick={() => setFaved(v => !v)} aria-label="즐겨찾기" aria-pressed={faved}>
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M12 3.6l2.5 5.3 5.8.7-4.3 4 1.1 5.8-5.1-2.9-5.1 2.9 1.1-5.8-4.3-4 5.8-.7z"
+                  fill={faved ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.8"
+                  strokeLinejoin="round" />
+          </svg>
+        </button>
 
-      <h1 className="wob__name" style={{ ...box(SLOTS.name), ...fs(72) }}>{storeName}</h1>
-      {info.main_menu && (
-        <p className="wob__category" style={{ ...box(SLOTS.category), ...fs(28) }}>
-          {info.main_menu} 전문
-        </p>
-      )}
-      {store.contact && (
-        <p className="wob__line" style={{ ...box(SLOTS.contact), ...fs(32) }}>{store.contact}</p>
-      )}
-      {store.address && (
-        <p className="wob__line" style={{ ...box(SLOTS.address), ...fs(28) }}>{store.address}</p>
-      )}
+        {hero && (
+          <img className="wob__hero" style={box(SLOTS.hero)}
+               src={mediaUrl(hero.url)} alt={`${storeName} 대표 사진`} />
+        )}
 
-      <SinceStamp year={info.founded_year} />
+        <h1 className="wob__name" style={{ ...box(SLOTS.name), ...fs(72) }}>{storeName}</h1>
+        {info.main_menu && (
+          <p className="wob__category" style={{ ...box(SLOTS.category), ...fs(28) }}>
+            {info.main_menu} 전문
+          </p>
+        )}
+        {store.contact && (
+          <p className="wob__line" style={{ ...box(SLOTS.contact), ...fs(32) }}>{store.contact}</p>
+        )}
+        {store.address && (
+          <p className="wob__line" style={{ ...box(SLOTS.address), ...fs(28) }}>{store.address}</p>
+        )}
 
-      <section className="wob__note" style={{ ...box(SLOTS.note), ...fs(24) }} aria-label="가게 이야기">
-        {store.story_lines.map((line, i) => <p key={i}>{line}</p>)}
-      </section>
+        <SinceStamp year={info.founded_year} />
 
-      {headline && (
-        <p className="wob__headline" style={{ ...box(SLOTS.headline), ...fs(46) }}>{headline}</p>
-      )}
+        <section className="wob__note" style={{ ...box(SLOTS.note), ...fs(20) }} aria-label="가게 이야기">
+          {store.story_lines.map((line, i) => <p key={i}>{line}</p>)}
+        </section>
 
-      {info.main_menu && (
-        <strong className="wob__value" style={{ ...box(SLOTS.vMenu), ...fs(36) }}>{info.main_menu}</strong>
-      )}
-      {info.price != null && (
-        <strong className="wob__value" style={{ ...box(SLOTS.vPrice), ...fs(36) }}>
-          {info.price.toLocaleString()}원
-        </strong>
-      )}
-      {info.hours && (
-        <strong className="wob__value" style={{ ...box(SLOTS.vTime), ...fs(34) }}>
-          {info.hours.open}~{info.hours.close}
-        </strong>
-      )}
-      {closed && (
-        <span className="wob__value wob__value--sub" style={{ ...box(SLOTS.vClosed), ...fs(24) }}>
-          {closed}
-        </span>
-      )}
+        {headline && (
+          <p className="wob__headline" style={{ ...box(SLOTS.headline), ...fs(46) }}>{headline}</p>
+        )}
 
-      {store.hashtags.slice(0, 3).map((t, i) => (
-        <span key={t} className="wob__tag" style={{ ...box(SLOTS.tags[i]), ...fs(30) }}>{t}</span>
-      ))}
+        {info.main_menu && (
+          <strong className="wob__value" style={{ ...box(SLOTS.vMenu), ...fs(30) }}>{info.main_menu}</strong>
+        )}
+        {info.price != null && (
+          <strong className="wob__value" style={{ ...box(SLOTS.vPrice), ...fs(30) }}>
+            {info.price.toLocaleString()}원
+          </strong>
+        )}
+        {info.hours && (
+          <strong className="wob__value" style={{ ...box(SLOTS.vTime), ...fs(27) }}>
+            {info.hours.open}~{info.hours.close}
+          </strong>
+        )}
+        {closed && (
+          <span className="wob__value wob__value--sub" style={{ ...box(SLOTS.vClosed), ...fs(19) }}>
+            {closed}
+          </span>
+        )}
 
-      {gallery.slice(0, 4).map((p, i) => (
-        <img key={p.url} className="wob__photo" style={box(SLOTS.gallery[i])}
-             src={mediaUrl(p.url)} alt="" loading="lazy" />
-      ))}
+        {store.hashtags.slice(0, 3).map((t, i) => (
+          <span key={t} className="wob__tag" style={{ ...box(SLOTS.tags[i]), ...fs(26) }}>{t}</span>
+        ))}
 
-      <a className="wob__cta" style={box(SLOTS.cta)} href={mapHref}
-         target="_blank" rel="noreferrer" aria-label="지도에서 보기" />
+        {gallery.map((p, i) => (
+          <img key={p.url} className="wob__photo" style={box(SLOTS.gallery[i])}
+               src={mediaUrl(p.url)} alt="" loading="lazy" />
+        ))}
+
+        <a className="wob__cta" style={box(SLOTS.cta)} href={mapHref}
+           target="_blank" rel="noreferrer" aria-label="지도에서 보기" />
+      </div>
     </div>
   );
 }

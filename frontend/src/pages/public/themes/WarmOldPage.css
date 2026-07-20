@@ -1,6 +1,7 @@
 /* ============================================================
    PUB · warm_old — 배경 이미지 오버레이 방식
-   배경: assets/themes/warm_old/warm-old-bg.jpg (Figma export, 804×1748)
+   배경: assets/themes/warm_old/warm-old-bg.jpg (Figma export, 상단 여백 제거 후 804×1688)
+   페이지 배경: paper-tile.jpg — 카드 밖 좌우 공백을 종이 질감으로 채움 (반응형)
    좌표는 JSX의 SLOTS에서 관리 — 이 파일은 타이포·질감·정렬만 담당.
    색·폰트 값 출처: 테마 개발전달가이드 v2 실측 표.
    ============================================================ */
@@ -14,6 +15,13 @@
 }
 */
 
+.wob-page {
+  min-height: 100dvh;
+  /* 카드 폭보다 넓은 화면에서 흰 공백 대신 종이 질감으로 채움 (거울 타일이라 이음새 없음) */
+  background: #ded0b2 url('../../../assets/themes/warm_old/paper-tile.jpg') repeat center top;
+  background-size: 256px 256px;
+}
+
 .wob {
   --wob-serif: 'Noto Serif KR', serif;
   --wob-hand: 'MapoAgape', 'Noto Serif KR', serif;
@@ -24,6 +32,7 @@
   container-type: inline-size;   /* cqw 폰트 스케일 기준 */
   background: #e6d6b8;           /* 이미지 로드 전 근사색 */
   user-select: text;
+  box-shadow: 0 0 28px rgba(60, 30, 10, 0.25); /* 타일 배경과 카드 구분 */
 }
 .wob__bg {
   display: block;
@@ -34,6 +43,23 @@
 
 /* ---- 슬롯 공통: 전부 절대배치, 좌표는 JSX inline style ---- */
 .wob > *:not(.wob__bg) { position: absolute; margin: 0; }
+
+/* 상단 뒤로가기 / 즐겨찾기 */
+.wob__iconbtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 1.5px solid rgba(99, 10, 1, 0.55);
+  border-radius: 50%;
+  background: rgba(243, 234, 216, 0.65);
+  color: #5d0800;
+  box-shadow: 1px 2px 3px rgba(60, 30, 10, 0.25);
+  cursor: pointer;
+}
+.wob__iconbtn svg { width: 55%; height: 55%; }
+.wob__iconbtn:active { transform: scale(0.94); }
+.wob__iconbtn.is-on { color: #a51114; }
 
 /* 대표 사진 — 우하단 접힌 모서리 장식이 보이도록 노치 클리핑 */
 .wob__hero {
@@ -82,12 +108,12 @@
   flex-direction: column;
   justify-content: center;
   gap: 0.55em;
-  transform: rotate(-3deg);      /* 쪽지 종이 기울기에 맞춤 — 어긋나면 여기 조정 */
+  transform: rotate(4.5deg);     /* 쪽지 종이 기울기 실측치(시계방향) — 어긋나면 여기 조정 */
   text-align: center;
   font-family: var(--wob-hand);
   color: #4c0700;
 }
-.wob__note p { margin: 0; line-height: 1.45; word-break: keep-all; }
+.wob__note p { margin: 0; line-height: 1.4; word-break: keep-all; }
 
 .wob__headline {
   display: flex;
