@@ -2,12 +2,13 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { getPublicStore, mediaUrl } from '../../api/client';
 import WarmOldPage from './themes/WarmOldPage';
+import NeatKoreanPage from './themes/NeatKoreanPage';
 import './themes/themes.css';
 import './StoryPage.css';
 
 /* 테마별 전용 레이아웃 (Figma 시안 반영분). 등록되지 않은 테마는
    아래 공통 레이아웃으로 렌더 — neat_korean·trendy_alley도 순차 이식 예정. */
-const THEME_PAGES = { warm_old: WarmOldPage };
+const THEME_PAGES = { warm_old: WarmOldPage, neat_korean: NeatKoreanPage };
 
 /**
  * PUB · 소비자용 공개 스토리 페이지 (/s/:storeId, 인증 불필요)

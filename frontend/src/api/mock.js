@@ -54,11 +54,16 @@ const PREVIEW_STORE = {
   },
   story_lines: SAMPLE_STORY.story_lines,
   hashtags: SAMPLE_STORY.hashtags,
+  quoted_sentence: SAMPLE_STORY.quoted_sentence,
+  // headline: 백엔드 story 스키마에 아직 없는 필드. neat_korean 헤드카피 슬롯
+  // 확인용으로만 프리뷰에 임시 주입 (강조 구간은 ** 로 표시).
+  headline: '시장 사람들의 오늘을 든든하게, 매일의 **따뜻한 밥 한 끼**',
+  // P1 촬영 순서 고정: 1=간판, 2=대표메뉴, 3=가게 내부, 4=메뉴판
   photos: [
     { url: previewPhoto('간판 사진', '#8a6b4f', '#f4ead6'), sort_order: 1 },
-    { url: previewPhoto('국밥', '#b0582f', '#fff3df'), sort_order: 2 },
+    { url: previewPhoto('대표메뉴', '#b0582f', '#fff3df'), sort_order: 2 },
     { url: previewPhoto('가게 내부', '#6e5a3c', '#f0e4c8'), sort_order: 3 },
-    { url: previewPhoto('가마솥', '#54432e', '#e8d9bd'), sort_order: 4 },
+    { url: previewPhoto('메뉴판', '#54432e', '#e8d9bd'), sort_order: 4 },
   ],
 };
 
