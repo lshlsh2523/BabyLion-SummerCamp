@@ -58,7 +58,6 @@ const PREVIEW_STORE = {
   // headline: 백엔드 story 스키마에 아직 없는 필드. neat_korean 헤드카피 슬롯
   // 확인용으로만 프리뷰에 임시 주입 (강조 구간은 ** 로 표시).
   headline: '시장 사람들의 오늘을 든든하게, 매일의 **따뜻한 밥 한 끼**',
-  // P1 촬영 순서 고정: 1=간판, 2=대표메뉴, 3=가게 내부, 4=메뉴판
   photos: [
     { url: previewPhoto('간판 사진', '#8a6b4f', '#f4ead6'), sort_order: 1 },
     { url: previewPhoto('대표메뉴', '#b0582f', '#fff3df'), sort_order: 2 },
@@ -186,11 +185,21 @@ export const mockApi = {
     // ?theme=neat_korean 처럼 쿼리로 테마 전환 가능. 프로덕션 빌드에선 비활성.
     if (import.meta.env.DEV && storeId === 'preview') {
       const theme = new URLSearchParams(window.location.search).get('theme');
-      return {
-        ...PREVIEW_STORE,
-        story: undefined,
-        theme_id: theme ?? PREVIEW_STORE.theme_id,
-      };
+      const base = { ...PREVIEW_STORE, story: undefined, theme_id: theme ?? PREVIEW_STORE.theme_id };
+      // trendy_alley 확인용: 헤드카피/본문의 강조 구간 마크업 임시 주입
+      // (**핑크** / __라임__). 실제로는 백엔드 LLM이 이 마크업을 넣어줘야 함.
+      if (base.theme_id === 'trendy_alley') {
+        // 헤드카피 전체가 이미 라임색(.ta__headline)이라 강조 마크업 없이도 색은 유지됨.
+        // __..__ 로 감싸면 둘째 줄만 font-weight:700(.ta__em--lime)이 되어 첫 줄과
+        // 두께가 달라지므로, 두 줄 두께를 통일하기 위해 강조 마크업을 빼고 그대로 둔다.
+        base.headline = '한 그릇에 담긴\n강렬한 개성과 깊은 맛!';
+        base.story_lines = [
+          '오랜 시간 사랑받아온 우리 가게의 손맛은',
+          '칼칼한 **김치**와 부드러운 __재료__의 완벽한 조화!',
+          '매일 끓여내는 진짜 국물 맛, 이곳에서 경험해보세요.',
+        ];
+      }
+      return base;
     }
     const s = db.stores.get(storeId);
     if (!s || !s.published) throw { status: 404, code: 'STORE_NOT_FOUND' };
