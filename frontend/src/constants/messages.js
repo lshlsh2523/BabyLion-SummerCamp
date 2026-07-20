@@ -33,13 +33,7 @@ export const MESSAGES = {
       {
         key: 'foundedYear',
         title: '*언제부터* 장사를\n하셨나요?',
-        tts: '언제부터 장사를 하셨나요? 아래에서 골라 주세요.',
-        options: [
-          { label: '10년 넘게', value: 10 },
-          { label: '20년 넘게', value: 20 },
-          { label: '30년 넘게', value: 30 },
-          { label: '40년 넘게', value: 40 },
-        ],
+        tts: '언제부터 장사를 하셨나요? 슬라이더를 움직여서 연도를 골라 주세요.',
       },
       {
         key: 'mainMenu',

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useFlow } from '../../context/FlowContext';
 import { saveBasicInfo } from '../../api/client';
 import { MESSAGES } from '../../constants/messages';
@@ -10,24 +10,63 @@ import './P2BasicInfo.css';
 
 /**
  * P2 · 핵심 정보 — 한 화면 = 한 질문, 4단계.
- * ① 창업연도(버튼 4개 단일 방식 — 수행일지 확정)
+ * ① 창업연도(연도 슬라이더 — 수행일지 확정)
  * ② 대표 메뉴(음성 → mock 단계에선 예시 텍스트로 저장)
  * ③ 가격(숫자 키패드) ④ 영업시간(시간대·휴무 버튼)
  */
-const YEARS_AGO = new Date().getFullYear();
+const CURRENT_YEAR = new Date().getFullYear();
+const MIN_YEAR = 1900;
+const DEFAULT_YEARS_AGO = 30;
 const DAYS = ['월', '화', '수', '목', '금', '토', '일'];
 const OPEN_OPTIONS = ['07:00', '09:00', '11:00'];
 const CLOSE_OPTIONS = ['18:00', '20:00', '22:00'];
+
+const clampYear = (y) => Math.min(CURRENT_YEAR, Math.max(MIN_YEAR, y));
 
 export default function P2BasicInfo({ speak, speaking }) {
   const { storeId, basicInfo, setBasicInfo, goTo } = useFlow();
   const [stepIdx, setStepIdx] = useState(0);
   const [priceInput, setPriceInput] = useState('');
+  const sliderSaveTimer = useRef(null);
   const step = MESSAGES.P2.steps[stepIdx];
+  const year = basicInfo.founded_year ?? CURRENT_YEAR - DEFAULT_YEARS_AGO;
 
   const save = async (partial) => {
     setBasicInfo(partial);
     await saveBasicInfo(storeId, partial);  // PUT /basic-info (부분 갱신)
+  };
+
+  // 창업연도 기본값(현재-30년) 확정 — 사용자가 슬라이더를 안 만져도 "다음"에 값이 저장돼 있도록.
+  useEffect(() => {
+    if (basicInfo.founded_year == null) save({ founded_year: year });
+    return () => clearTimeout(sliderSaveTimer.current);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  /** 클램프 후 로컬 반영 + 저장 + TTS. −/+ 버튼과 슬라이더 release(손 뗀 시점)에서만 호출. */
+  const commitYear = (y) => {
+    clearTimeout(sliderSaveTimer.current);
+    const clamped = clampYear(y);
+    save({ founded_year: clamped });
+    speak(`${clamped}년`);   // useSpeak이 매 호출 전 cancel() 하므로 연타해도 마지막 값만 낭독
+  };
+
+  /** 드래그 중(input) — 화면은 즉시, 네트워크 저장만 250ms 디바운스. TTS는 여기서 하지 않음
+   *  (드래그 중 잠깐 멈출 때마다 읽으면 산만해지므로 release 시점의 commitYear에서만 낭독). */
+  const handleSliderInput = (e) => {
+    const y = clampYear(Number(e.target.value));
+    setBasicInfo({ founded_year: y });
+    clearTimeout(sliderSaveTimer.current);
+    sliderSaveTimer.current = setTimeout(() => {
+      saveBasicInfo(storeId, { founded_year: y });
+    }, 250);
+  };
+
+  const handleSliderChange = (e) => commitYear(Number(e.target.value));
+
+  const adjustYear = (delta) => {
+    navigator.vibrate?.(15);
+    commitYear(year + delta);
   };
 
   const goNextStep = () => {
@@ -45,18 +84,32 @@ export default function P2BasicInfo({ speak, speaking }) {
   /* ---- 단계별 본문 ---- */
   const body = {
     foundedYear: (
-      <div className="p2-grid">
-        {step.options?.map((opt) => {
-          const selected = basicInfo.founded_year === YEARS_AGO - opt.value;
-          return (
-            <button key={opt.value}
-                    className={`p2-option${selected ? ' p2-option--on' : ''}`}
-                    aria-pressed={selected}
-                    onClick={() => { navigator.vibrate?.(15); save({ founded_year: YEARS_AGO - opt.value }); }}>
-              {opt.label}
-            </button>
-          );
-        })}
+      <div className="p2-year">
+        <p className="p2-year__display" aria-live="polite">{year}년</p>
+
+        <div className="p2-year__slider-row">
+          <button type="button" className="p2-year__step" aria-label="1년 전으로"
+                  disabled={year <= MIN_YEAR} onClick={() => adjustYear(-1)}>−</button>
+
+          <input
+            type="range"
+            className="p2-year__slider"
+            min={MIN_YEAR}
+            max={CURRENT_YEAR}
+            step={1}
+            value={year}
+            onInput={handleSliderInput}
+            onChange={handleSliderChange}
+            aria-label="창업 연도"
+            aria-valuetext={`${year}년`}
+            style={{
+              background: `linear-gradient(to right, var(--green-600) ${((year - MIN_YEAR) / (CURRENT_YEAR - MIN_YEAR)) * 100}%, var(--bg-track) ${((year - MIN_YEAR) / (CURRENT_YEAR - MIN_YEAR)) * 100}%)`,
+            }}
+          />
+
+          <button type="button" className="p2-year__step" aria-label="1년 후로"
+                  disabled={year >= CURRENT_YEAR} onClick={() => adjustYear(1)}>+</button>
+        </div>
       </div>
     ),
 
@@ -148,7 +201,7 @@ export default function P2BasicInfo({ speak, speaking }) {
   }[step.key];
 
   const stepDone = {
-    foundedYear: !!basicInfo.founded_year,
+    foundedYear: true,   // 기본값(현재-30년)이 항상 있으므로 상시 활성
     mainMenu: !!basicInfo.main_menu,
     price: !!basicInfo.price,
     hours: !!basicInfo.hours?.open,
