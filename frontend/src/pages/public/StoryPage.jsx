@@ -1,8 +1,13 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { getPublicStore, mediaUrl } from '../../api/client';
+import WarmOldPage from './themes/WarmOldPage';
 import './themes/themes.css';
 import './StoryPage.css';
+
+/* 테마별 전용 레이아웃 (Figma 시안 반영분). 등록되지 않은 테마는
+   아래 공통 레이아웃으로 렌더 — neat_korean·trendy_alley도 순차 이식 예정. */
+const THEME_PAGES = { warm_old: WarmOldPage };
 
 /**
  * PUB · 소비자용 공개 스토리 페이지 (/s/:storeId, 인증 불필요)
@@ -20,6 +25,9 @@ export default function StoryPage() {
 
   if (notFound) return <div className="pub pub--empty">아직 공개되지 않은 가게예요.</div>;
   if (!store) return <div className="pub pub--empty">불러오는 중…</div>;
+
+  const ThemePage = THEME_PAGES[store.theme_id];
+  if (ThemePage) return <ThemePage store={store} />;
 
   const [hero, ...rest] = [...store.photos].sort((a, b) => a.sort_order - b.sort_order);
   const { basic_info: info } = store;

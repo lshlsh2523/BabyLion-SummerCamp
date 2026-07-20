@@ -33,6 +33,35 @@ const SAMPLE_STORY_ALT = {
   quoted_sentence: '우리 집 국물은 거짓말을 못 혀',
 };
 
+/** 프리뷰용 플레이스홀더 사진 — 외부 요청 없는 SVG data URI */
+const previewPhoto = (label, bg, fg) =>
+  'data:image/svg+xml,' +
+  encodeURIComponent(
+    `<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300">` +
+    `<rect width="400" height="300" fill="${bg}"/>` +
+    `<text x="200" y="158" font-family="sans-serif" font-size="26" fill="${fg}" text-anchor="middle">${label}</text></svg>`,
+  );
+
+const PREVIEW_STORE = {
+  store_id: 'preview',
+  title: SAMPLE_STORY.title,
+  theme_id: SAMPLE_STORY.theme_id,
+  basic_info: {
+    founded_year: 1984,
+    main_menu: '가마솥 국밥',
+    price: 9000,
+    hours: { open: '09:00', close: '20:00', closed_days: ['일'] },
+  },
+  story_lines: SAMPLE_STORY.story_lines,
+  hashtags: SAMPLE_STORY.hashtags,
+  photos: [
+    { url: previewPhoto('간판 사진', '#8a6b4f', '#f4ead6'), sort_order: 1 },
+    { url: previewPhoto('국밥', '#b0582f', '#fff3df'), sort_order: 2 },
+    { url: previewPhoto('가게 내부', '#6e5a3c', '#f0e4c8'), sort_order: 3 },
+    { url: previewPhoto('가마솥', '#54432e', '#e8d9bd'), sort_order: 4 },
+  ],
+};
+
 export const mockApi = {
   async createStore() {
     await delay(300);
@@ -148,6 +177,16 @@ export const mockApi = {
 
   async getPublicStore(storeId) {
     await delay(200);
+    // [DEV 전용] /s/preview — 플로우 완주 없이 테마 작업용 즉시 프리뷰.
+    // ?theme=neat_korean 처럼 쿼리로 테마 전환 가능. 프로덕션 빌드에선 비활성.
+    if (import.meta.env.DEV && storeId === 'preview') {
+      const theme = new URLSearchParams(window.location.search).get('theme');
+      return {
+        ...PREVIEW_STORE,
+        story: undefined,
+        theme_id: theme ?? PREVIEW_STORE.theme_id,
+      };
+    }
     const s = db.stores.get(storeId);
     if (!s || !s.published) throw { status: 404, code: 'STORE_NOT_FOUND' };
     return {

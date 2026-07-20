@@ -1,0 +1,137 @@
+/* ============================================================
+   PUB · warm_old — 배경 이미지 오버레이 방식
+   배경: assets/themes/warm_old/warm-old-bg.jpg (Figma export, 804×1748)
+   좌표는 JSX의 SLOTS에서 관리 — 이 파일은 타이포·질감·정렬만 담당.
+   색·폰트 값 출처: 테마 개발전달가이드 v2 실측 표.
+   ============================================================ */
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@500;600;700&family=Inter:wght@400;500&display=swap');
+
+/* MapoAgape — assets/fonts/MapoAgape.woff2 확보 후 주석 해제
+@font-face {
+  font-family: 'MapoAgape';
+  src: url('../../../assets/fonts/MapoAgape.woff2') format('woff2');
+  font-display: swap;
+}
+*/
+
+.wob {
+  --wob-serif: 'Noto Serif KR', serif;
+  --wob-hand: 'MapoAgape', 'Noto Serif KR', serif;
+
+  position: relative;
+  max-width: 480px;
+  margin: 0 auto;
+  container-type: inline-size;   /* cqw 폰트 스케일 기준 */
+  background: #e6d6b8;           /* 이미지 로드 전 근사색 */
+  user-select: text;
+}
+.wob__bg {
+  display: block;
+  width: 100%;
+  height: auto;
+  pointer-events: none;
+}
+
+/* ---- 슬롯 공통: 전부 절대배치, 좌표는 JSX inline style ---- */
+.wob > *:not(.wob__bg) { position: absolute; margin: 0; }
+
+/* 대표 사진 — 우하단 접힌 모서리 장식이 보이도록 노치 클리핑 */
+.wob__hero {
+  object-fit: cover;
+  border-radius: 4px;
+  clip-path: polygon(0 0, 100% 0, 100% 81%, 76% 100%, 0 100%);
+}
+
+.wob__name {
+  display: flex;
+  align-items: center;
+  font-family: var(--wob-serif);
+  font-weight: 700;
+  letter-spacing: 0.15em;        /* 가이드 5.4px/36px ≈ 0.15em */
+  color: #5d0800;
+  white-space: nowrap;
+  overflow: visible;
+}
+.wob__category {
+  display: flex;
+  align-items: center;
+  font-family: var(--wob-serif);
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  color: #a51114;
+}
+.wob__line {
+  display: flex;
+  align-items: center;
+  font-family: var(--wob-serif);
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  color: #630a01;
+}
+
+.wob__stamp {
+  color: #a51114;
+  opacity: 0.85;
+  transform: rotate(-14deg);
+  mix-blend-mode: multiply;
+  font-family: var(--wob-serif);
+}
+
+.wob__note {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.55em;
+  transform: rotate(-3deg);      /* 쪽지 종이 기울기에 맞춤 — 어긋나면 여기 조정 */
+  text-align: center;
+  font-family: var(--wob-hand);
+  color: #4c0700;
+}
+.wob__note p { margin: 0; line-height: 1.45; word-break: keep-all; }
+
+.wob__headline {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--wob-hand);
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  color: #9f1012;
+  white-space: nowrap;
+}
+
+.wob__value {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Inter', 'Noto Sans KR', sans-serif;
+  font-weight: 500;
+  color: #1a0d05;
+  white-space: nowrap;
+}
+.wob__value--sub { font-weight: 400; color: #3a2a1a; }
+
+.wob__tag {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Inter', 'Noto Sans KR', sans-serif;
+  color: #5d0800;
+  white-space: nowrap;
+}
+
+.wob__photo {
+  object-fit: cover;
+  border: 3px solid #f3ead8;
+  border-radius: 6px;
+  box-shadow: 1px 2px 4px rgba(60, 30, 10, 0.35);
+  background: #f3ead8;
+}
+
+/* 배경에 그려진 버튼 위 투명 클릭 영역 */
+.wob__cta { display: block; border-radius: 999px; }
+.wob__cta:focus-visible { outline: 3px solid #f3ead8; outline-offset: 2px; }
+.wob__cta:active { background: rgba(255, 255, 255, 0.08); }
+
+/* ?debug — 슬롯 외곽선 표시 (좌표 조정용) */
+.wob--debug > *:not(.wob__bg) { outline: 1.5px dashed rgba(0, 180, 90, 0.8); }

@@ -25,6 +25,6 @@ export const getPublicStore = (storeId)                 => mockApi.getPublicStor
 
 /** 미디어 상대경로 → 절대 URL (mock 단계에선 blob: URL이라 그대로 반환) */
 export const mediaUrl = (path) =>
-  path?.startsWith('blob:') || path?.startsWith('http')
+  path?.startsWith('blob:') || path?.startsWith('data:') || path?.startsWith('http')
     ? path
     : `${import.meta.env.VITE_API_HOST ?? ''}${path ?? ''}`;
