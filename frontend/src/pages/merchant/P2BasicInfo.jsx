@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useFlow } from '../../context/FlowContext';
-import { saveBasicInfo } from '../../api/client';
+import { saveBasicInfo, transcribeAudio } from '../../api/client';
+import { useRecorder } from '../../hooks/useRecorder';
 import { MESSAGES } from '../../constants/messages';
 import ScreenLayout from '../../components/ScreenLayout';
 import ProgressBar from '../../components/ProgressBar';
@@ -35,6 +36,27 @@ export default function P2BasicInfo({ speak, speaking }) {
     setBasicInfo(partial);
     await saveBasicInfo(storeId, partial);  // PUT /basic-info (부분 갱신)
   };
+
+  // 대표 메뉴 음성 입력 — 실제 녹음 → STT(/transcribe) → main_menu 저장
+  const [menuBusy, setMenuBusy] = useState(false);
+  const [menuError, setMenuError] = useState(null);
+  const { recording: menuRecording, elapsed: menuElapsed, error: menuMicError, toggle: toggleMenu } =
+    useRecorder({
+      onComplete: async (blob) => {
+        setMenuBusy(true);
+        setMenuError(null);
+        try {
+          const { transcript } = await transcribeAudio(storeId, blob);
+          const menu = (transcript || '').trim().slice(0, 30);   // main_menu 30자 제한
+          if (!menu) { setMenuError('empty'); return; }
+          await save({ main_menu: menu });
+        } catch (e) {
+          setMenuError(e?.code || 'STT_FAILED');
+        } finally {
+          setMenuBusy(false);
+        }
+      },
+    });
 
   // 창업연도 기본값(현재-30년) 확정 — 사용자가 슬라이더를 안 만져도 "다음"에 값이 저장돼 있도록.
   useEffect(() => {
@@ -115,20 +137,31 @@ export default function P2BasicInfo({ speak, speaking }) {
 
     mainMenu: (
       <div className="p2-menu">
-        {basicInfo.main_menu ? (
+        {menuBusy ? (
+          <p className="p2-menu__hint">듣고 있어요…</p>
+        ) : basicInfo.main_menu ? (
           <p className="p2-menu__value">"{basicInfo.main_menu}"</p>
         ) : (
           <p className="p2-menu__hint">마이크를 누르고{'\n'}대표 메뉴를 말씀해 주세요</p>
         )}
-        {/* mock 단계: 탭 시 예시 STT 결과 저장. 월요일에 useRecorder + STT 연동 */}
-        <button className="p2-mic" aria-label="대표 메뉴 말하기"
-                onClick={() => { navigator.vibrate?.(15); save({ main_menu: '가마솥 국밥' }); }}>
+        {(menuError || menuMicError) && !menuBusy && (
+          <p className="p2-menu__hint" style={{ color: '#c0392b' }}>
+            {menuMicError === 'mic_denied'
+              ? '마이크 권한을 허용해 주세요'
+              : '잘 안 들렸어요. 다시 말씀해 주세요'}
+          </p>
+        )}
+        {/* 실제 녹음 → /transcribe STT → main_menu 저장 (탭해서 시작, 다시 탭해서 종료) */}
+        <button className={`p2-mic${menuRecording ? ' p2-mic--on' : ''}`} aria-label="대표 메뉴 말하기"
+                aria-pressed={menuRecording} disabled={menuBusy}
+                onClick={() => { navigator.vibrate?.(15); toggleMenu(); }}>
           <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="#fff"
                strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-            <rect x="9" y="2" width="6" height="12" rx="3" />
-            <path d="M5 10a7 7 0 0 0 14 0" /><path d="M12 19v3" />
+            {menuRecording
+              ? <rect x="7" y="7" width="10" height="10" rx="2" fill="#fff" />
+              : <><rect x="9" y="2" width="6" height="12" rx="3" /><path d="M5 10a7 7 0 0 0 14 0" /><path d="M12 19v3" /></>}
           </svg>
-          <span>눌러서 말하기</span>
+          <span>{menuBusy ? '변환 중…' : menuRecording ? `${menuElapsed}초 · 끝내기` : '눌러서 말하기'}</span>
         </button>
       </div>
     ),

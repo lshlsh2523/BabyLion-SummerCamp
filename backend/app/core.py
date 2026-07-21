@@ -110,10 +110,22 @@ def validate_basic_info(payload) -> dict:
     if not isinstance(payload, dict):
         raise validation_error("JSON 객체 본문이 필요합니다.")
 
-    known = {"founded_year", "main_menu", "price", "hours"}
+    known = {"store_name", "address", "founded_year", "main_menu", "price", "hours"}
     fields = {k: v for k, v in payload.items() if k in known}
     if not fields:
         raise validation_error("갱신할 필드가 없습니다.")
+
+    if "store_name" in fields:
+        n = fields["store_name"]
+        if not isinstance(n, str) or not (1 <= len(n.strip()) <= 60):
+            raise validation_error("store_name은 1~60자 문자열이어야 합니다.")
+        fields["store_name"] = n.strip()
+
+    if "address" in fields:
+        a = fields["address"]
+        if not isinstance(a, str) or not (1 <= len(a.strip()) <= 200):
+            raise validation_error("address는 1~200자 문자열이어야 합니다.")
+        fields["address"] = a.strip()
 
     if "founded_year" in fields:
         y = fields["founded_year"]

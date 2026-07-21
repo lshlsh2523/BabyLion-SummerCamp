@@ -107,3 +107,41 @@ def upload_answer(
     if old_path and old_path != path and os.path.exists(old_path):
         os.remove(old_path)
     return {"answer_id": answer.answer_id, "question_no": qno, "transcript": transcript}
+
+
+@router.post("/stores/{store_id}/transcribe")
+def transcribe_audio(
+    store_id: str,
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db),
+    x_edit_token: str | None = Depends(edit_token_header),
+):
+    """음성을 텍스트로만 변환하고 반환한다(저장하지 않음).
+
+    대표 메뉴처럼 basic_info 로 들어갈 짧은 음성 입력용. 인터뷰 답변(/answers)과 달리
+    Answer 테이블에 남기지 않고 임시 파일로만 처리한다.
+    """
+    store = get_store_or_404(store_id, db)
+    require_token(store, x_edit_token)
+
+    ext = file_ext(file.filename)
+    if ext not in AUDIO_FORMATS:
+        raise ApiError(415, "UNSUPPORTED_FORMAT", "Only webm, mp3, wav, and m4a files are supported.")
+    data = file.file.read()
+    if len(data) > AUDIO_MAX_BYTES:
+        raise ApiError(413, "FILE_TOO_LARGE", "Audio files must not exceed 15MB.")
+
+    with tempfile.NamedTemporaryFile("wb", suffix=f".{ext}", delete=False) as temp_file:
+        temp_path = temp_file.name
+        temp_file.write(data)
+    try:
+        duration = audio_duration_seconds(temp_path)
+        if duration is None:
+            raise ApiError(503, "AUDIO_DURATION_UNAVAILABLE", "Install ffprobe to validate this audio format.")
+        if duration > AUDIO_MAX_SECONDS:
+            raise ApiError(422, "AUDIO_TOO_LONG", f"Audio must not exceed {AUDIO_MAX_SECONDS} seconds.")
+        transcript = transcribe(temp_path, build_hint(store.main_menu))
+    finally:
+        if os.path.exists(temp_path):
+            os.remove(temp_path)
+    return {"transcript": transcript}

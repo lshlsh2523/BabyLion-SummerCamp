@@ -77,6 +77,14 @@ export const uploadAnswer = (storeId, questionNo, blob) => {
   return request(`/stores/${storeId}/answers`, { method: 'POST', body: fd });
 };
 
+// 저장 없이 음성만 텍스트로 변환 (대표 메뉴 등 basic_info 음성 입력용)
+export const transcribeAudio = (storeId, blob) => {
+  const ext = (blob.type?.split('/')[1] || 'webm').split(';')[0];
+  const fd = new FormData();
+  fd.append('file', blob, `menu.${ext}`);
+  return request(`/stores/${storeId}/transcribe`, { method: 'POST', body: fd });
+};
+
 export const generate = (storeId, { retry = false } = {}) =>
   request(`/stores/${storeId}/generate${retry ? '?retry=true' : ''}`, { method: 'POST' });
 
