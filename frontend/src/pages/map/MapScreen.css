@@ -282,3 +282,22 @@
   text-overflow: ellipsis;
 }
 .map-store__arrow { flex-shrink: 0; color: var(--sub); }
+<<<<<<< HEAD
+
+/* 핀 클릭 시 상세 카드 */
+.map-detail { padding: 4px 20px 20px; display: flex; flex-direction: column; gap: 10px; }
+.map-detail__name { margin: 0; font-size: 20px; font-weight: 800; color: var(--ink); }
+.map-detail__link {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  margin-top: 4px; padding: 13px 16px; border-radius: 14px;
+  background: var(--green-600, #3f9142); color: #fff;
+  font-size: 15px; font-weight: 700; text-decoration: none;
+}
+.map-detail__nopage { margin: 4px 0 0; font-size: 13px; color: var(--sub); }
+.map-detail__back {
+  align-self: flex-start; margin-top: 2px; padding: 6px 0;
+  background: none; border: none; color: var(--sub);
+  font-size: 13px; font-weight: 600; cursor: pointer;
+}
+=======
+>>>>>>> origin/main

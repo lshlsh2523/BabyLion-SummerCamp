@@ -118,6 +118,22 @@ def publish_story(
     return {"public_url": store.public_url}
 
 
+@router.get("/public/stores")
+def list_public_stores(db: Session = Depends(get_db)):
+    """발행된 가게 목록 (노포 지도용). 인증 불필요."""
+    stores = db.query(Store).filter(Store.published.is_(True)).all()
+    return [
+        {
+            "store_id": store.store_id,
+            "store_name": store.store_name,
+            "address": store.address,
+            "main_menu": store.main_menu,
+            "theme_id": (store.story or {}).get("theme_id") if store.story else None,
+        }
+        for store in stores
+    ]
+
+
 @router.get("/public/stores/{store_id}")
 def get_public_store_story(store_id: str, db: Session = Depends(get_db)):
     store = db.get(Store, store_id)

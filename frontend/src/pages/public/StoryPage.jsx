@@ -39,7 +39,7 @@ export default function StoryPage() {
       {/* ① 대표 사진 + 타이틀 */}
       <header className="pub__hero">
         {hero && <img src={mediaUrl(hero.url)} alt="" className="pub__hero-img" />}
-        <h1 className="pub__title">{store.title}</h1>
+        <h1 className="pub__title">{store.store_name || store.title}</h1>
       </header>
 
       {/* ② 실용 정보 (스토리보다 위) */}
@@ -47,6 +47,7 @@ export default function StoryPage() {
         <dl>
           <div><dt>대표 메뉴</dt><dd>{info.main_menu}</dd></div>
           <div><dt>가격</dt><dd>{info.price?.toLocaleString()}원</dd></div>
+          {store.address && <div><dt>주소</dt><dd>{store.address}</dd></div>}
           <div>
             <dt>영업시간</dt>
             <dd>

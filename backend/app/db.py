@@ -18,13 +18,17 @@ Base = declarative_base()
 
 
 def ensure_schema(bind) -> None:
-    """Apply the small additive migration required by existing SQLite databases."""
+    """Apply the small additive migrations required by existing SQLite databases."""
     columns = {column["name"] for column in inspect(bind).get_columns("stores")}
-    if "generation_count" not in columns:
-        with bind.begin() as connection:
-            connection.execute(
-                text("ALTER TABLE stores ADD COLUMN generation_count INTEGER NOT NULL DEFAULT 0")
-            )
+    migrations = {
+        "generation_count": "ALTER TABLE stores ADD COLUMN generation_count INTEGER NOT NULL DEFAULT 0",
+        "store_name": "ALTER TABLE stores ADD COLUMN store_name VARCHAR(60)",
+        "address": "ALTER TABLE stores ADD COLUMN address VARCHAR(200)",
+    }
+    for column, ddl in migrations.items():
+        if column not in columns:
+            with bind.begin() as connection:
+                connection.execute(text(ddl))
 
 
 def new_uuid() -> str:
@@ -51,6 +55,8 @@ class Store(Base):
     published = Column(Boolean, nullable=False, default=False)
     generation_count = Column(Integer, nullable=False, default=0)
     # basic_info (전부 미입력 시 응답에서 basic_info: null)
+    store_name = Column(String(60), nullable=True)   # 회원가입 시 입력
+    address = Column(String(200), nullable=True)     # 음성 인식으로 입력
     founded_year = Column(Integer, nullable=True)
     main_menu = Column(String(30), nullable=True)
     price = Column(Integer, nullable=True)
@@ -65,9 +71,12 @@ class Store(Base):
     jobs = relationship("GenerationJob", backref="store", cascade="all, delete-orphan")
 
     def basic_info(self) -> dict | None:
-        if all(v is None for v in (self.founded_year, self.main_menu, self.price, self.hours)):
+        fields = (self.store_name, self.address, self.founded_year, self.main_menu, self.price, self.hours)
+        if all(v is None for v in fields):
             return None
         return {
+            "store_name": self.store_name,
+            "address": self.address,
             "founded_year": self.founded_year,
             "main_menu": self.main_menu,
             "price": self.price,

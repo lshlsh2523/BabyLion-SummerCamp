@@ -22,10 +22,11 @@ const SLOTS = {
   fav:      [692, 88, 76, 80],
   category: [44, 258, 190, 48],
   name:     [36, 285, 350, 96],
-  headline: [40, 500, 330, 205],
+  address:  [40, 392, 350, 40],   // 주소 (가게명과 헤드카피 사이 여백; ?debug로 미세조정)
+  headline: [40, 452, 345, 300],   // 가게 서사 3문장 스토리 영역 (주소 아래로 붙여 위로 올림)
   hero:     [398, 285, 350, 475],
-  note_title: [175, 805, 510, 45],  // 쪽지 상단 "사장님의 한마디" (좌우 잎 장식 사이)
-  note:     [175, 865, 510, 240],   // 쪽지 안쪽(제목·여백 제외), 인용문 영역
+  note_title: [140, 805, 510, 45],  // 쪽지 상단 "사장님의 한마디" (왼쪽으로 옮겨 가운데 정렬)
+  note:     [140, 865, 510, 240],   // 쪽지 안쪽 인용문 영역 (왼쪽으로 옮겨 가운데 정렬)
   vMenu:    [110, 1188, 178, 70],
   vPrice:   [300, 1188, 178, 70],
   vTime:    [490, 1188, 210, 44],
@@ -65,10 +66,9 @@ export default function NeatKoreanPage({ store }) {
   const gallery = [bySortOrder(2), bySortOrder(3), hero, bySortOrder(4)].filter(Boolean);
 
   const debug = typeof window !== 'undefined' && window.location.search.includes('debug');
-  const storeName = store.title?.includes(',')
-    ? store.title.slice(store.title.lastIndexOf(',') + 1).trim()
-    : store.title;
-  const mapHref = `https://map.naver.com/p/search/${encodeURIComponent(storeName)}`; // TODO: 지도 협의
+  const storeName = store.store_name
+    || (store.title?.includes(',') ? store.title.slice(store.title.lastIndexOf(',') + 1).trim() : store.title);
+  const mapHref = `https://map.kakao.com/?q=${encodeURIComponent(store.address || storeName)}`; // 주소 우선, 없으면 가게명
 
   return (
     <div className="nk-page">
@@ -83,11 +83,19 @@ export default function NeatKoreanPage({ store }) {
 
       <h1 className="nk__name" style={{ ...box(SLOTS.name), ...fs(72) }}>{storeName}</h1>
 
-      {/* 헤드카피 — 백엔드 headline 추가 전까지 값 없으면 생략 */}
-      {store.headline && (
+      {store.address && (
+        <p className="nk__category" style={{ ...box(SLOTS.address), ...fs(24) }}>{store.address}</p>
+      )}
+
+      {/* 가게 서사 — 3문장 스토리 (headline 필드가 있으면 그걸, 없으면 story_lines 사용) */}
+      {store.headline ? (
         <p className="nk__headline" style={{ ...box(SLOTS.headline), ...fs(38) }}>
           {renderHeadline(store.headline)}
         </p>
+      ) : store.story_lines?.length > 0 && (
+        <div className="nk__headline nk__story" style={{ ...box(SLOTS.headline), ...fs(26) }}>
+          {store.story_lines.map((line, i) => <p key={i}>{line}</p>)}
+        </div>
       )}
 
       {hero && (

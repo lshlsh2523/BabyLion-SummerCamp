@@ -89,6 +89,8 @@
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
   color: #fff; font-size: 16px; font-weight: var(--fw-bold);
 }
+.p2-mic--on { background: linear-gradient(135deg, #FFB84D, #E8862B); box-shadow: 0 12px 30px rgba(232, 134, 43, 0.38); }
+.p2-mic:disabled { opacity: 0.6; }
 
 /* ③ 가격 키패드 */
 .p2-price { width: 100%; display: flex; flex-direction: column; gap: 14px; }
