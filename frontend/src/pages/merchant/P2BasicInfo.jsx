@@ -163,7 +163,7 @@ export default function P2BasicInfo({ speak, speaking }) {
           {OPEN_OPTIONS.map((t) => (
             <button key={t}
                     className={`p2-chip${basicInfo.hours?.open === t ? ' p2-chip--on' : ''}`}
-                    onClick={() => save({ hours: { close: '20:00', closed_days: [], ...basicInfo.hours, open: t } })}>
+                    onClick={() => save({ hours: { closed_days: [], ...basicInfo.hours, open: t } })}>
               {t}
             </button>
           ))}
@@ -173,7 +173,7 @@ export default function P2BasicInfo({ speak, speaking }) {
           {CLOSE_OPTIONS.map((t) => (
             <button key={t}
                     className={`p2-chip${basicInfo.hours?.close === t ? ' p2-chip--on' : ''}`}
-                    onClick={() => save({ hours: { open: '09:00', closed_days: [], ...basicInfo.hours, close: t } })}>
+                    onClick={() => save({ hours: { closed_days: [], ...basicInfo.hours, close: t } })}>
               {t}
             </button>
           ))}
@@ -187,7 +187,7 @@ export default function P2BasicInfo({ speak, speaking }) {
               return (
                 <button key={d} className={`p2-chip p2-chip--day${on ? ' p2-chip--on' : ''}`}
                         onClick={() => save({
-                          hours: { open: '09:00', close: '20:00', ...basicInfo.hours,
+                          hours: { ...basicInfo.hours,
                                    closed_days: on ? days.filter((x) => x !== d) : [...days, d] },
                         })}>
                   {d}
