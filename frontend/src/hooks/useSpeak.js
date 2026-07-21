@@ -36,5 +36,19 @@ export function useSpeak() {
 
   useEffect(() => stop, [stop]); // 언마운트 시 정리
 
+  // 사용자가 액션(탭)하면 재생 중이던 안내 음성을 즉시 끊는다.
+  // (새 화면으로 이동하는 버튼은 탭 이후 speak()가 호출돼 새 안내가 정상 재생됨)
+  useEffect(() => {
+    if (!supported) return undefined;
+    const cancelOnInteract = () => {
+      if (window.speechSynthesis.speaking || window.speechSynthesis.pending) {
+        window.speechSynthesis.cancel();
+        setSpeaking(false);
+      }
+    };
+    document.addEventListener('pointerdown', cancelOnInteract);
+    return () => document.removeEventListener('pointerdown', cancelOnInteract);
+  }, [supported]);
+
   return { speak, stop, speaking, supported };
 }
