@@ -29,3 +29,6 @@
 /* P6 만세 + 색종이 */
 .illust-cheer { position: relative; display: inline-block; animation: cheer 1.8s ease-in-out infinite; }
 .illust-cheer__confetti { position: absolute; animation-name: confetti; animation-timing-function: ease-in; animation-iteration-count: infinite; }
+
+/* ROLE 벽 뒤에서 인사하는 할머니 */
+.illust-greeting__arm { transform-origin: 127px 84px; animation: wave 1.4s ease-in-out infinite; }

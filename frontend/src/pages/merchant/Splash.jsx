@@ -13,8 +13,8 @@ export default function Splash({ speak }) {
 
   const handleTap = () => {
     navigator.vibrate?.(15);
-    speak(MESSAGES.P0.tts);   // 제스처 직후 호출 → 재생 허용
-    goTo('P0');
+    speak(MESSAGES.ROLE.tts);   // 제스처 직후 호출 → 재생 허용
+    goTo('ROLE');
   };
 
   return (
