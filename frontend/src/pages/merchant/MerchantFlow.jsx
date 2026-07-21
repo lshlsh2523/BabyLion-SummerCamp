@@ -4,10 +4,7 @@ import { useSpeak } from '../../hooks/useSpeak';
 import Splash from './Splash';
 import RoleSelect from './RoleSelect';
 import Signup from './Signup';
-<<<<<<< HEAD
 import AddressVoice from './AddressVoice';
-=======
->>>>>>> origin/main
 import MapScreen from '../map/MapScreen';
 import P0Start from './P0Start';
 import P1Photo from './P1Photo';
@@ -33,10 +30,7 @@ export default function MerchantFlow() {
     case 'SPLASH': return <Splash {...common} />;
     case 'ROLE':   return <RoleSelect {...common} />;
     case 'SIGNUP': return <Signup {...common} />;
-<<<<<<< HEAD
     case 'ADDRESS': return <AddressVoice {...common} />;
-=======
->>>>>>> origin/main
     case 'MAP':    return <MapScreen />;
     case 'P0':     return <P0Start {...common} />;
     case 'P1':     return <P1Photo {...common} />;
