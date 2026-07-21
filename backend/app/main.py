@@ -10,12 +10,14 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
-from .core import (MEDIA_DIR, PRIVATE_DIR, ApiError, api_error_handler,
+from .core import (CORS_ORIGINS, MEDIA_DIR, PRIVATE_DIR, ApiError, api_error_handler,
                    request_validation_handler)
-from .db import Base, engine
-from .routers import answers, photos, stores
+from .db import Base, engine, ensure_schema, recover_incomplete_jobs
+from .routers import answers, generation, photos, stores
 
 Base.metadata.create_all(bind=engine)
+ensure_schema(engine)
+recover_incomplete_jobs()
 os.makedirs(MEDIA_DIR, exist_ok=True)
 os.makedirs(PRIVATE_DIR, exist_ok=True)
 
@@ -24,7 +26,7 @@ app = FastAPI(title="BabyLion-SummerCamp API", version="0.1.0")
 # FE 로컬 개발용 — 캠프 MVP라 전체 허용, 배포 시 도메인 제한
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=CORS_ORIGINS,
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -40,3 +42,4 @@ API_PREFIX = "/api/v1"
 app.include_router(stores.router, prefix=API_PREFIX, tags=["stores"])
 app.include_router(photos.router, prefix=API_PREFIX, tags=["photos"])
 app.include_router(answers.router, prefix=API_PREFIX, tags=["answers"])
+app.include_router(generation.router, prefix=API_PREFIX, tags=["generation"])

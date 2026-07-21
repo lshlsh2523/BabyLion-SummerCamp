@@ -1,54 +1,31 @@
-# BabyLion-SummerCamp Backend — 이슈 #1~#3
+# BabyLion-SummerCamp Backend
 
-FastAPI + SQLite. 명세서 1~4장(가게/사진/핵심정보/음성답변) 구현분.
+FastAPI와 SQLite 기반 API입니다. 가게 생성, 사진·음성 답변 업로드, 스토리 생성, 발행을 제공합니다.
+
+Python 3.10 이상이 필요합니다.
 
 ## 실행
 
-```bash
+```powershell
 pip install -r requirements.txt
-cp .env.example .env          # 필요 시 값 수정
+$env:OPENAI_API_KEY = "your-api-key" # 스토리 생성 기능을 사용할 때만 필요
 uvicorn app.main:app --reload --port 8000
 ```
 
-- 자동 문서: http://localhost:8000/docs — 전 API 클릭 테스트 가능
-- 테스트: `python -m pytest tests/ -q` (22개)
-- 음성 길이(90초) 검증에 ffmpeg 필요: `brew install ffmpeg` / `apt install ffmpeg`
-  (없으면 길이 검증만 스킵하고 서버는 정상 동작)
+- API 문서: `http://localhost:8000/docs`
+- 테스트: `python -m pytest tests/ -q`
+- 생성 모델은 `OPENAI_MODEL` 환경 변수로 변경할 수 있으며, 기본값은 `gpt-4o`입니다.
+- CORS 허용 도메인은 `CORS_ORIGINS` 환경 변수에 쉼표로 구분해 설정합니다.
+- 기본 DB·미디어 경로는 backend 폴더를 기준으로 하므로, 실행 위치가 달라도 같은 데이터를 사용합니다.
+- WAV 파일은 내장 검사로 길이를 검증합니다. webm·mp3·m4a는 `ffprobe`가 필요하며, 없으면 업로드가 `503 AUDIO_DURATION_UNAVAILABLE`으로 거절됩니다.
 
-## 구조
+## 주요 경로
 
-```
-app/
-├── main.py          앱 조립: 라우터, 예외 핸들러, /media 정적 서빙, CORS
-├── core.py          공통 기반: 설정 / 에러 규약 / 토큰 검증 / basic_info 검증
-├── db.py            테이블 4개: stores, photos, answers, generation_jobs
-├── routers/
-│   ├── stores.py    이슈 #1  POST·GET /stores, PUT basic-info
-│   ├── photos.py    이슈 #2  업로드(1600px 리사이즈)·삭제, 5장 제한
-│   └── answers.py   이슈 #3  음성 업로드 + 동기 STT + question_no 덮어쓰기
-└── services/
-    └── stt.py       ★ 월요일 교체 지점
-```
+- `POST /api/v1/stores`
+- `POST /api/v1/stores/{store_id}/photos`
+- `POST /api/v1/stores/{store_id}/answers`
+- `POST /api/v1/stores/{store_id}/generate`
+- `GET /api/v1/jobs/{job_id}`
+- `POST /api/v1/stores/{store_id}/publish`
 
-## 월요일 인수인계 (백2 → 백1)
-
-`app/services/stt.py`의 `transcribe(file_path: str, hint: str) -> str` 내부만
-Whisper 호출로 교체하면 끝. 힌트 조립(`build_hint`: 고정 도메인 힌트 +
-main_menu 동적 주입)은 이미 구현되어 있음. 호출부는 수정 불필요.
-
-이슈 #5(생성)도 같은 패턴으로 `generate_story(transcripts, basic_info) -> dict`
-함수를 services/ 아래에 받을 예정.
-
-## 명세 공백에서 정한 것 (팀 확인 필요)
-
-1. 형식 오류 = **415 UNSUPPORTED_FORMAT**, 용량 초과 = **413 FILE_TOO_LARGE** (사진·음성 동일 체계)
-2. 없는 사진 삭제 시 **404 PHOTO_NOT_FOUND** 추가
-3. **GET /stores/{id}에도 토큰 필수** — 공통 규약(0장)은 쓰기만 필수라 하지만
-   1.2에 헤더가 명시돼 있고 transcript 등 내부 데이터 보호 차원에서 필수로 구현.
-   FE 확인 필요 (sessionStorage에 토큰 있으니 헤더만 붙이면 됨)
-4. 검증 순서 고정: **404 → 403 → 400** (이 순서 보장을 위해 basic-info는 수동 검증)
-5. CORS 전체 허용 (MVP) — 배포 시 도메인 제한
-6. edit_token은 **생성 응답에서 1회만 노출**, 조회 응답에 미포함
-7. **음성 답변 파일은 private/ (비서빙 경로)에 저장** — 발행 후 store_id가 공개되므로
-   /media 하위에 두면 경로 추측만으로 토큰 없이 다운로드가 가능해지는 문제 차단.
-   사진은 공개 페이지 표시용이라 /media 유지. 회귀 테스트로 고정 (총 23개)
+`OPENAI_API_KEY`는 코드나 저장소에 기록하지 말고 실행 환경에서만 설정하세요.

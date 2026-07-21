@@ -4,7 +4,7 @@ export const CONFIG = {
   PHOTO_MAX: 5,
   PHOTO_MAX_MB: 10,
 
-  RECORD_MAX_SEC: 90,          // 답변당 최대 90초 자동 정지
+  RECORD_MAX_SEC: 60,          // 답변당 최대 60초 자동 정지 (CLOVA 단문 인식 상한)
   ANSWER_COUNT: 3,
 
   POLL_INTERVAL_MS: 2000,      // GET /jobs/{id} 폴링 간격

@@ -8,26 +8,43 @@ import os
 import re
 import shutil
 import subprocess
+import wave
 from datetime import datetime
+from pathlib import Path
 
 from fastapi import Header
 from fastapi.responses import JSONResponse
 
+# .env 자동 로드 (backend/.env). 이미 설정된 환경변수는 덮어쓰지 않는다(테스트 안전).
+try:
+    from dotenv import load_dotenv
+
+    load_dotenv(Path(__file__).resolve().parents[1] / ".env")
+except ModuleNotFoundError:
+    pass
+
 # ---------------------------------------------------------------- 설정
-MEDIA_DIR = os.environ.get("MEDIA_DIR", os.path.join(os.getcwd(), "media"))
+BASE_DIR = Path(__file__).resolve().parents[1]
+MEDIA_DIR = os.environ.get("MEDIA_DIR", str(BASE_DIR / "media"))
 # 음성 답변 등 비공개 파일 저장소 — /media처럼 정적 서빙하지 않는다.
 # 발행 후 store_id가 공개되므로, 서빙 경로에 두면 URL 추측만으로 다운로드가 가능해진다.
-PRIVATE_DIR = os.environ.get("PRIVATE_DIR", os.path.join(os.getcwd(), "private"))
-DATABASE_URL = os.environ.get("DATABASE_URL", "sqlite:///./babylion.db")
+PRIVATE_DIR = os.environ.get("PRIVATE_DIR", str(BASE_DIR / "private"))
+DATABASE_URL = os.environ.get("DATABASE_URL", f"sqlite:///{(BASE_DIR / 'babylion.db').as_posix()}")
+CORS_ORIGINS = [
+    origin.strip()
+    for origin in os.environ.get("CORS_ORIGINS", "http://localhost:5173,http://127.0.0.1:5173").split(",")
+    if origin.strip()
+]
 
 PHOTO_MAX_COUNT = 5
 PHOTO_MAX_BYTES = 10 * 1024 * 1024          # 10MB
+PHOTO_MAX_PIXELS = 40_000_000
 PHOTO_FORMATS = {"jpg", "jpeg", "png", "webp"}
 PHOTO_RESIZE_LONG_EDGE = 1600
 
 AUDIO_MAX_BYTES = 15 * 1024 * 1024          # 15MB
-AUDIO_MAX_SECONDS = 90
-AUDIO_FORMATS = {"webm", "mp3", "wav", "m4a"}
+AUDIO_MAX_SECONDS = 60                       # CLOVA 단문 인식 상한(60초)에 맞춤
+AUDIO_FORMATS = {"webm", "mp3", "wav", "m4a"}  # 업로드 허용 포맷(webm 은 STT 단계에서 wav 변환)
 QUESTION_NOS = {1, 2, 3}
 
 DAYS = ["월", "화", "수", "목", "금", "토", "일"]
@@ -136,7 +153,7 @@ def file_ext(filename: str | None) -> str:
     return filename.rsplit(".", 1)[1].lower()
 
 
-def audio_duration_seconds(path: str) -> float | None:
+def _ffprobe_duration_seconds(path: str) -> float | None:
     """ffprobe로 재생 길이 측정. ffprobe가 없으면 None(검증 스킵)."""
     if shutil.which("ffprobe") is None:
         return None
@@ -148,4 +165,18 @@ def audio_duration_seconds(path: str) -> float | None:
         )
         return float(out.stdout.strip())
     except Exception:
+        return None
+
+
+def audio_duration_seconds(path: str) -> float | None:
+    """Return duration, using WAV parsing when ffprobe is unavailable."""
+    duration = _ffprobe_duration_seconds(path)
+    if duration is not None:
+        return duration
+    if file_ext(path) != "wav":
+        return None
+    try:
+        with wave.open(path, "rb") as audio:
+            return audio.getnframes() / audio.getframerate()
+    except (wave.Error, OSError, ZeroDivisionError):
         return None
