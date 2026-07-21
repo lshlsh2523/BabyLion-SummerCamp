@@ -1,8 +1,11 @@
 /**
  * ★ 서버 호출이 모이는 유일한 파일 ★
  *
- * createStore()는 request() 를 통해 실서버(POST /api/v1/stores)를 호출한다.
- * 나머지 함수는 아직 mock.js 를 호출한다 — 다음 단계에서 하나씩 request() 로 교체.
+ * 모든 함수가 request() 를 통해 실서버(FastAPI)를 호출한다.
+ * - 쓰기 요청에는 X-Edit-Token 자동 주입 (createStore·공개조회 제외)
+ * - 파일 업로드(사진·음성)는 FormData 로 전송
+ * - getPublicStore 는 백엔드의 중첩 story 를 평면으로 펴서 페이지 계약을 맞춘다
+ * DEV 전용 /s/preview(테마 작업용)만 mock 을 유지한다.
  * 페이지·컴포넌트 코드는 한 줄도 바꾸지 않는 것이 목표.
  */
 import { mockApi } from './mock';
@@ -28,7 +31,8 @@ const getEditToken = () => {
  */
 async function request(path, { method = 'GET', body, auth = true } = {}) {
   const headers = {};
-  if (body !== undefined) headers['Content-Type'] = 'application/json';
+  const isForm = body instanceof FormData;   // 파일 업로드는 브라우저가 boundary 를 직접 붙이도록 둔다
+  if (body !== undefined && !isForm) headers['Content-Type'] = 'application/json';
   if (auth) {
     const token = getEditToken();
     if (token) headers['X-Edit-Token'] = token;
@@ -37,7 +41,7 @@ async function request(path, { method = 'GET', body, auth = true } = {}) {
   const res = await fetch(`${BASE}${path}`, {
     method,
     headers,
-    body: body !== undefined ? JSON.stringify(body) : undefined,
+    body: body === undefined ? undefined : (isForm ? body : JSON.stringify(body)),
   });
 
   if (res.status === 204) return null;
@@ -52,16 +56,40 @@ async function request(path, { method = 'GET', body, auth = true } = {}) {
   return data;
 }
 
-export const createStore    = ()                        => request('/stores', { method: 'POST', auth: false });
-export const getStore       = (storeId)                 => mockApi.getStore(storeId);
-export const uploadPhoto    = (storeId, file)           => mockApi.uploadPhoto(storeId, file);
-export const deletePhoto    = (storeId, photoId)        => mockApi.deletePhoto(storeId, photoId);
-export const saveBasicInfo  = (storeId, partial)        => mockApi.saveBasicInfo(storeId, partial);
-export const uploadAnswer   = (storeId, questionNo, b)  => mockApi.uploadAnswer(storeId, questionNo, b);
-export const generate       = (storeId, opts)           => mockApi.generate(storeId, opts);
-export const getJob         = (jobId)                   => mockApi.getJob(jobId);
-export const publish        = (storeId)                 => mockApi.publish(storeId);
-export const getPublicStore = (storeId)                 => mockApi.getPublicStore(storeId);
+export const createStore    = ()                => request('/stores', { method: 'POST', auth: false });
+export const getStore       = (storeId)          => request(`/stores/${storeId}`);
+export const saveBasicInfo  = (storeId, partial) => request(`/stores/${storeId}/basic-info`, { method: 'PUT', body: partial });
+
+export const uploadPhoto = (storeId, file) => {
+  const fd = new FormData();
+  fd.append('file', file, file.name);
+  return request(`/stores/${storeId}/photos`, { method: 'POST', body: fd });
+};
+
+export const deletePhoto = (storeId, photoId) =>
+  request(`/stores/${storeId}/photos/${photoId}`, { method: 'DELETE' });
+
+export const uploadAnswer = (storeId, questionNo, blob) => {
+  const ext = (blob.type?.split('/')[1] || 'webm').split(';')[0];
+  const fd = new FormData();
+  fd.append('file', blob, `q${questionNo}.${ext}`);
+  fd.append('question_no', String(questionNo));
+  return request(`/stores/${storeId}/answers`, { method: 'POST', body: fd });
+};
+
+export const generate = (storeId, { retry = false } = {}) =>
+  request(`/stores/${storeId}/generate${retry ? '?retry=true' : ''}`, { method: 'POST' });
+
+export const getJob  = (jobId)   => request(`/jobs/${jobId}`);
+export const publish = (storeId) => request(`/stores/${storeId}/publish`, { method: 'POST' });
+
+export const getPublicStore = async (storeId) => {
+  // DEV 전용 테마 프리뷰(/s/preview)는 백엔드 없이 mock 으로 유지
+  if (import.meta.env.DEV && storeId === 'preview') return mockApi.getPublicStore('preview');
+  const data = await request(`/public/stores/${storeId}`, { auth: false });
+  const { story, ...rest } = data;          // 백엔드 중첩 story → 평면화 (StoryPage 계약)
+  return { ...rest, ...(story ?? {}) };
+};
 
 /** 미디어 상대경로 → 절대 URL (mock 단계에선 blob: URL이라 그대로 반환) */
 export const mediaUrl = (path) =>

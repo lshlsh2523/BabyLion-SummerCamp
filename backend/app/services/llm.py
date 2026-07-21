@@ -8,6 +8,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
 from ..db import Answer, GenerationJob, SessionLocal, Store
+from .keyword_theme import classify_theme
 
 
 logger = logging.getLogger("uvicorn.error")
@@ -90,7 +91,16 @@ async def run_llm_generation_workflow(job_id: str, store_id: str) -> None:
         raw = response.choices[0].message.content
         if not raw:
             raise ValueError("The model returned an empty response")
-        store.story = _story_dict(StoryPayload(**json.loads(raw)))
+        story_dict = _story_dict(StoryPayload(**json.loads(raw)))
+        # LLM 이 자유롭게 뱉은 theme_id 는 무시하고, 단어 빈도로 프론트 3종 중 하나를 강제한다.
+        theme_source = " ".join([
+            story_dict.get("title", ""),
+            *story_dict.get("story_lines", []),
+            story_dict.get("quoted_sentence", ""),
+            answer_text,
+        ])
+        story_dict["theme_id"] = classify_theme(theme_source)
+        store.story = story_dict
         job.status = "done"
         job.error = None
         db.commit()
