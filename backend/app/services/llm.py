@@ -9,6 +9,7 @@ from sqlalchemy.orm import Session
 
 from ..db import Answer, GenerationJob, SessionLocal, Store
 
+
 logger = logging.getLogger("uvicorn.error")
 
 
@@ -28,7 +29,9 @@ def _get_client():
         from openai import OpenAI
     except ImportError as exc:
         raise RuntimeError("The openai package is not installed") from exc
-    return OpenAI(api_key=api_key)
+    # OPENAI_BASE_URL 이 있으면 OpenAI 호환 엔드포인트(예: Gemini)로 호출한다.
+    base_url = os.environ.get("OPENAI_BASE_URL")
+    return OpenAI(api_key=api_key, base_url=base_url) if base_url else OpenAI(api_key=api_key)
 
 
 def _story_dict(story: StoryPayload) -> dict:
@@ -59,13 +62,17 @@ async def run_llm_generation_workflow(job_id: str, store_id: str) -> None:
         )
         answer_text = "\n".join(f"Q{answer.question_no}: {answer.transcript}" for answer in answers)
         system_prompt = (
-            "Write a warm Korean story about a local store. Return JSON only with "
-            "title, story_lines (exactly three strings), hashtags, theme_id, and quoted_sentence."
+            "당신은 대한민국 지역 노포(오래된 가게)의 따뜻한 브랜드 스토리를 쓰는 한국어 카피라이터입니다. "
+            "모든 출력 텍스트(title, story_lines, hashtags, quoted_sentence)는 반드시 한국어로 작성하세요. "
+            "영어를 절대 쓰지 마세요. JSON 객체 하나만 출력합니다. "
+            "키: title(문자열), story_lines(정확히 3개의 한국어 문장 배열), hashtags(#로 시작하는 한국어 태그 배열), "
+            "theme_id(문자열), quoted_sentence(상인의 인상적인 한마디, 한국어)."
         )
         user_prompt = (
-            f"Store founded year: {store.founded_year}\n"
-            f"Main menu: {store.main_menu}\nPrice: {store.price}\n"
-            f"Owner interview:\n{answer_text}"
+            f"창업연도: {store.founded_year}\n"
+            f"대표메뉴: {store.main_menu}\n가격: {store.price}\n"
+            f"사장님 인터뷰:\n{answer_text}\n\n"
+            "위 내용을 바탕으로 한국어 가게 스토리를 만들어 주세요."
         )
         client = _get_client()
         response = await asyncio.wait_for(

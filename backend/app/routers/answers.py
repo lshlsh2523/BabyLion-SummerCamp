@@ -29,7 +29,7 @@ router = APIRouter()
 def upload_answer(
     store_id: str,
     question_no: str | None = Form(default=None),
-    file: UploadFile | None = File(default=None),
+    file: UploadFile = File(...),  # 필수 → Swagger 가 파일 선택 버튼을 렌더링
     db: Session = Depends(get_db),
     x_edit_token: str | None = Depends(edit_token_header),
 ):
@@ -42,8 +42,6 @@ def upload_answer(
         raise validation_error("question_no must be an integer from 1 through 3.")
     if qno not in QUESTION_NOS:
         raise validation_error("question_no must be an integer from 1 through 3.")
-    if file is None:
-        raise validation_error("file is required.")
 
     ext = file_ext(file.filename)
     if ext not in AUDIO_FORMATS:

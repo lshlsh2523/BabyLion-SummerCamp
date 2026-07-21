@@ -15,6 +15,14 @@ from pathlib import Path
 from fastapi import Header
 from fastapi.responses import JSONResponse
 
+# .env 자동 로드 (backend/.env). 이미 설정된 환경변수는 덮어쓰지 않는다(테스트 안전).
+try:
+    from dotenv import load_dotenv
+
+    load_dotenv(Path(__file__).resolve().parents[1] / ".env")
+except ModuleNotFoundError:
+    pass
+
 # ---------------------------------------------------------------- 설정
 BASE_DIR = Path(__file__).resolve().parents[1]
 MEDIA_DIR = os.environ.get("MEDIA_DIR", str(BASE_DIR / "media"))
@@ -35,8 +43,8 @@ PHOTO_FORMATS = {"jpg", "jpeg", "png", "webp"}
 PHOTO_RESIZE_LONG_EDGE = 1600
 
 AUDIO_MAX_BYTES = 15 * 1024 * 1024          # 15MB
-AUDIO_MAX_SECONDS = 90
-AUDIO_FORMATS = {"webm", "mp3", "wav", "m4a"}
+AUDIO_MAX_SECONDS = 60                       # CLOVA 단문 인식 상한(60초)에 맞춤
+AUDIO_FORMATS = {"webm", "mp3", "wav", "m4a"}  # 업로드 허용 포맷(webm 은 STT 단계에서 wav 변환)
 QUESTION_NOS = {1, 2, 3}
 
 DAYS = ["월", "화", "수", "목", "금", "토", "일"]
