@@ -10,10 +10,12 @@
   border-radius: 50%;
   border: 2px solid #7ED03C;
   animation: ripple 1.7s ease-out infinite;
+  pointer-events: none;
 }
 .p3-rec__ring--late { animation-delay: 0.55s; }
 
 .p3-rec__btn {
+  position: relative;
   width: 126px; height: 126px;
   border-radius: 50%;
   background: var(--grad-select);

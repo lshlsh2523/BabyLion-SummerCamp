@@ -33,6 +33,39 @@ const SAMPLE_STORY_ALT = {
   quoted_sentence: '우리 집 국물은 거짓말을 못 혀',
 };
 
+/** 프리뷰용 플레이스홀더 사진 — 외부 요청 없는 SVG data URI */
+const previewPhoto = (label, bg, fg) =>
+  'data:image/svg+xml,' +
+  encodeURIComponent(
+    `<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300">` +
+    `<rect width="400" height="300" fill="${bg}"/>` +
+    `<text x="200" y="158" font-family="sans-serif" font-size="26" fill="${fg}" text-anchor="middle">${label}</text></svg>`,
+  );
+
+const PREVIEW_STORE = {
+  store_id: 'preview',
+  title: SAMPLE_STORY.title,
+  theme_id: SAMPLE_STORY.theme_id,
+  basic_info: {
+    founded_year: 1984,
+    main_menu: '가마솥 국밥',
+    price: 9000,
+    hours: { open: '09:00', close: '20:00', closed_days: ['일'] },
+  },
+  story_lines: SAMPLE_STORY.story_lines,
+  hashtags: SAMPLE_STORY.hashtags,
+  quoted_sentence: SAMPLE_STORY.quoted_sentence,
+  // headline: 백엔드 story 스키마에 아직 없는 필드. neat_korean 헤드카피 슬롯
+  // 확인용으로만 프리뷰에 임시 주입 (강조 구간은 ** 로 표시).
+  headline: '시장 사람들의 오늘을 든든하게, 매일의 **따뜻한 밥 한 끼**',
+  photos: [
+    { url: previewPhoto('간판 사진', '#8a6b4f', '#f4ead6'), sort_order: 1 },
+    { url: previewPhoto('대표메뉴', '#b0582f', '#fff3df'), sort_order: 2 },
+    { url: previewPhoto('가게 내부', '#6e5a3c', '#f0e4c8'), sort_order: 3 },
+    { url: previewPhoto('메뉴판', '#54432e', '#e8d9bd'), sort_order: 4 },
+  ],
+};
+
 export const mockApi = {
   async createStore() {
     await delay(300);
@@ -148,6 +181,26 @@ export const mockApi = {
 
   async getPublicStore(storeId) {
     await delay(200);
+    // [DEV 전용] /s/preview — 플로우 완주 없이 테마 작업용 즉시 프리뷰.
+    // ?theme=neat_korean 처럼 쿼리로 테마 전환 가능. 프로덕션 빌드에선 비활성.
+    if (import.meta.env.DEV && storeId === 'preview') {
+      const theme = new URLSearchParams(window.location.search).get('theme');
+      const base = { ...PREVIEW_STORE, story: undefined, theme_id: theme ?? PREVIEW_STORE.theme_id };
+      // trendy_alley 확인용: 헤드카피/본문의 강조 구간 마크업 임시 주입
+      // (**핑크** / __라임__). 실제로는 백엔드 LLM이 이 마크업을 넣어줘야 함.
+      if (base.theme_id === 'trendy_alley') {
+        // 헤드카피 전체가 이미 라임색(.ta__headline)이라 강조 마크업 없이도 색은 유지됨.
+        // __..__ 로 감싸면 둘째 줄만 font-weight:700(.ta__em--lime)이 되어 첫 줄과
+        // 두께가 달라지므로, 두 줄 두께를 통일하기 위해 강조 마크업을 빼고 그대로 둔다.
+        base.headline = '한 그릇에 담긴\n강렬한 개성과 깊은 맛!';
+        base.story_lines = [
+          '오랜 시간 사랑받아온 우리 가게의 손맛은',
+          '칼칼한 **김치**와 부드러운 __재료__의 완벽한 조화!',
+          '매일 끓여내는 진짜 국물 맛, 이곳에서 경험해보세요.',
+        ];
+      }
+      return base;
+    }
     const s = db.stores.get(storeId);
     if (!s || !s.published) throw { status: 404, code: 'STORE_NOT_FOUND' };
     return {

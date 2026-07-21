@@ -1,0 +1,112 @@
+/* ============================================================
+   PUB · neat_korean — 배경 이미지 오버레이 방식
+   배경: assets/themes/neat_korean/nk-bg.jpg (Figma export, 804×1748)
+   색·폰트 값 출처: 테마 개발전달가이드 v2 실측 표.
+   ============================================================ */
+@import url('https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Inter:wght@400;500&display=swap');
+
+/* 가이드 지정 폰트(빙그레 싸만코/마포백패킹/교보손글씨)는 무료 배포본을
+   assets/fonts/ 에 넣고 @font-face 로 교체. 확보 전까지 손글씨 계열
+   Gowun Batang 으로 근사. (제목은 굵게, 본문은 손글씨 톤) */
+
+.nk-page {
+  min-height: 100dvh;
+  /* 카드 폭보다 넓은 화면의 좌우 공백을 순수 아이보리 종이로 채움 (장식 없는 배경).
+     세로 거울 접합본이라 아래로 반복돼도 이음새가 없다. */
+  background: #f7efdf url('../../../assets/themes/neat_korean/nk-paper.jpg') repeat center top;
+  background-size: 804px auto;
+}
+
+.nk {
+  --nk-green-deep: #02422e;   /* 강조/딥그린 */
+  --nk-green-mid: #396b58;    /* 해시태그 */
+  --nk-green-soft: #6d7550;   /* 헤드카피 기본 */
+  --nk-ink: #314b40;          /* 정보 값 */
+  --nk-serif: 'Gowun Batang', serif;
+
+  position: relative;
+  max-width: 480px;
+  margin: 0 auto;
+  container-type: inline-size;
+  background: #fdf6e6;           /* 이미지 로드 전 근사색 */
+  user-select: text;
+  box-shadow: 0 0 28px rgba(70, 80, 50, 0.22); /* 종이 배경과 카드 구분 */
+}
+/* 카드 배경 겸 높이 기준 — warm_old(.wob__bg)와 동일하게 img로 처리 */
+.nk__bg { display: block; width: 100%; height: auto; pointer-events: none; }
+
+.nk > *:not(.nk__bg) { position: absolute; margin: 0; }
+
+/* 카테고리 배지 — 배경에 초록 붓터치 배지가 이미 그려져 있어 텍스트만 얹음 */
+.nk__category {
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--nk-serif); font-weight: 700;
+  letter-spacing: 0.04em; color: #fff;
+  white-space: nowrap;
+}
+
+.nk__name {
+  display: flex; align-items: center;
+  font-family: var(--nk-serif); font-weight: 700;
+  letter-spacing: 0.05em; color: #111;
+  white-space: nowrap;
+}
+
+.nk__headline {
+  display: flex; flex-direction: column; justify-content: center;
+  font-family: var(--nk-serif); font-weight: 400;
+  line-height: 1.5; color: var(--nk-green-soft);
+  word-break: keep-all;
+}
+.nk__hl-em { font-style: normal; font-weight: 700; color: var(--nk-green-deep); }
+
+.nk__hero {
+  object-fit: cover;
+  border: 6px solid #fff;
+  border-radius: 4px;
+  box-shadow: 2px 4px 10px rgba(60, 70, 50, 0.25);
+  transform: rotate(2.2deg);   /* 폴라로이드 기울기 — 어긋나면 조정 */
+}
+
+.nk__note-title {
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--nk-serif); font-weight: 700;
+  color: var(--nk-green-deep); white-space: nowrap;
+}
+
+.nk__note {
+  display: flex; flex-direction: column; justify-content: center;
+  text-align: center;
+  font-family: var(--nk-serif);
+  color: #2c2c2c; line-height: 1.6;
+  word-break: keep-all;
+}
+
+.nk__value {
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--nk-serif); font-weight: 700;
+  color: var(--nk-ink); white-space: nowrap;
+}
+.nk__value--sub { font-weight: 400; color: #5a6b5a; }
+
+/* 해시태그 — 배경 새끼줄 배너 안에서 가운데 정렬, 한 줄 */
+.nk__tags {
+  display: flex; align-items: center; justify-content: center;
+  gap: 0.5em; flex-wrap: nowrap;
+  font-family: var(--nk-serif); font-weight: 700;
+  color: var(--nk-green-mid); white-space: nowrap;
+}
+
+.nk__photo {
+  object-fit: cover;
+  border: 5px solid #fff;
+  border-radius: 3px;
+  box-shadow: 1px 2px 5px rgba(60, 70, 50, 0.22);
+  background: #fff;
+}
+
+.nk__cta { display: block; border-radius: 999px; }
+.nk__cta:focus-visible { outline: 3px solid var(--nk-green-deep); outline-offset: 2px; }
+.nk__cta:active { background: rgba(255, 255, 255, 0.1); }
+
+.nk--debug > *:not(.nk__bg) { outline: 1.5px dashed rgba(30, 120, 60, 0.85); }
