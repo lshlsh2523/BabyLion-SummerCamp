@@ -28,10 +28,11 @@ export default function ScreenLayout({
   hideWave = false,
   actions,           // 하단 버튼 영역
   lemonBg = false,   // 스플래시용 단색 배경
+  className = '',    // 화면별 여백 오버라이드용 (선택)
   children,
 }) {
   return (
-    <div className={`screen${lemonBg ? ' screen--lemon' : ''}`}>
+    <div className={`screen${lemonBg ? ' screen--lemon' : ''}${className ? ' ' + className : ''}`}>
       {!lemonBg && (
         <>
           <div className="screen__blob screen__blob--tr" aria-hidden="true" />

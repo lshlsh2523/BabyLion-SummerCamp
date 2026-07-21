@@ -41,6 +41,9 @@
 /* P6 만세 */
 @keyframes cheer { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-7px); } }
 
+/* ROLE 인사하는 손 흔들기 */
+@keyframes wave { 0%, 100% { transform: rotate(0deg); } 50% { transform: rotate(14deg); } }
+
 /* P1 촬영 완료 체크 아이콘 */
 @keyframes popIn {
   0%   { transform: scale(0.4); opacity: 0; }

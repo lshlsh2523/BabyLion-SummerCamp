@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { useFlow } from '../../context/FlowContext';
 import { useSpeak } from '../../hooks/useSpeak';
 import Splash from './Splash';
+import RoleSelect from './RoleSelect';
+import Signup from './Signup';
 import P0Start from './P0Start';
 import P1Photo from './P1Photo';
 import P2BasicInfo from './P2BasicInfo';
@@ -24,6 +26,16 @@ export default function MerchantFlow() {
 
   switch (step) {
     case 'SPLASH': return <Splash {...common} />;
+    case 'ROLE':   return <RoleSelect {...common} />;
+    case 'SIGNUP': return <Signup {...common} />;
+    // TODO: 다음 작업에서 실제 화면으로 교체 예정 (3. 지도)
+    case 'MAP':    return (
+      <div style={{ height: '100dvh', display: 'flex', alignItems: 'center',
+                     justifyContent: 'center', textAlign: 'center', fontSize: 20,
+                     color: 'var(--green-sub)' }}>
+        지도 화면 준비 중이에요
+      </div>
+    );
     case 'P0':     return <P0Start {...common} />;
     case 'P1':     return <P1Photo {...common} />;
     case 'P2':     return <P2BasicInfo {...common} />;

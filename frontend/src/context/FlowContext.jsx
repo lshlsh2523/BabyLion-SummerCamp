@@ -6,7 +6,7 @@ import { CONFIG } from '../constants/config';
  * - 단일 라우트('/') 안에서 step 으로 화면 전환 (브라우저 뒤로가기 비의존 원칙)
  * - 전체 상태를 sessionStorage 에 동기화 → 새로고침 복구 (명세서 4.2)
  *
- * step: 'SPLASH' | 'P0' | 'P1' | 'P2' | 'P3' | 'P4' | 'P5' | 'P6'
+ * step: 'SPLASH' | 'ROLE' | 'SIGNUP' | 'MAP' | 'P0' | 'P1' | 'P2' | 'P3' | 'P4' | 'P5' | 'P6'
  */
 const initialState = {
   step: 'SPLASH',
