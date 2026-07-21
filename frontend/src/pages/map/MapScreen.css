@@ -282,7 +282,6 @@
   text-overflow: ellipsis;
 }
 .map-store__arrow { flex-shrink: 0; color: var(--sub); }
-<<<<<<< HEAD
 
 /* 핀 클릭 시 상세 카드 */
 .map-detail { padding: 4px 20px 20px; display: flex; flex-direction: column; gap: 10px; }
@@ -299,5 +298,3 @@
   background: none; border: none; color: var(--sub);
   font-size: 13px; font-weight: 600; cursor: pointer;
 }
-=======
->>>>>>> origin/main
