@@ -27,7 +27,9 @@ const SLOTS = {
   name:     [30, 535, 430, 105],
   category: [30, 662, 430, 58],
   contact:  [30, 740, 430, 62],
-  address:  [30, 826, 440, 56],
+  address:  [30, 648, 440, 60],    // 가게명 바로 아래(빈칸 없이), 검정
+  quote:    [30, 730, 445, 210],   // 주소 아래 빈 줄 영역 — 사장님 한마디 인용
+  since:    [40, 985, 724, 56],    // 구분선 '위쪽'에 일자 텍스트 (?debug로 미세조정)
   note:     [486, 662, 250, 258],   // 메모지 안쪽 (찢어진 가장자리 여백 확보, 우상단 클립 회피)
   stamp:    [132, 848, 152, 152],
   headline: [40, 1012, 724, 72],
@@ -73,7 +75,8 @@ function SinceStamp({ year }) {
 }
 
 export default function WarmOldPage({ store }) {
-  const { headline, storeName } = splitTitle(store.title);
+  const { headline, storeName: parsedName } = splitTitle(store.title);
+  const storeName = store.store_name || parsedName;   // 회원가입 가게명 우선
   const info = store.basic_info ?? {};
   const closed = info.hours
     ? (info.hours.closed_days?.length ? `(매주 ${info.hours.closed_days.join('·')} 휴무)` : '(연중무휴)')
@@ -87,7 +90,7 @@ export default function WarmOldPage({ store }) {
   const gallery = photos.slice(0, 4);
   const debug = typeof window !== 'undefined' && window.location.search.includes('debug');
 
-  const mapHref = `https://map.naver.com/p/search/${encodeURIComponent(storeName)}`; // TODO: 지도 기능 협의
+  const mapHref = `https://map.kakao.com/?q=${encodeURIComponent(store.address || storeName)}`; // 주소 우선, 없으면 가게명
   const goBack = () => (window.history.length > 1 ? window.history.back() : window.location.assign('/'));
 
   return (
@@ -117,21 +120,22 @@ export default function WarmOldPage({ store }) {
         )}
 
         <h1 className="wob__name" style={{ ...box(SLOTS.name), ...fs(72) }}>{storeName}</h1>
-        {info.main_menu && (
-          <p className="wob__category" style={{ ...box(SLOTS.category), ...fs(28) }}>
-            {info.main_menu} 전문
-          </p>
-        )}
-        {store.contact && (
-          <p className="wob__line" style={{ ...box(SLOTS.contact), ...fs(32) }}>{store.contact}</p>
-        )}
+        {/* 카테고리("○○ 전문") 대신 가게 주소를 이름 바로 아래 검정으로 표시 */}
         {store.address && (
-          <p className="wob__line" style={{ ...box(SLOTS.address), ...fs(28) }}>{store.address}</p>
+          <p className="wob__line" style={{ ...box(SLOTS.address), ...fs(28), color: '#1a1a1a' }}>{store.address}</p>
         )}
 
-        <SinceStamp year={info.founded_year} />
+        {/* 주소 아래 빈 줄 영역 — 사장님(할머니) 한마디 인용 */}
+        {store.quoted_sentence && (
+          <p className="wob__quote" style={{ ...box(SLOTS.quote), ...fs(30) }}>“{store.quoted_sentence}”</p>
+        )}
 
-        <section className="wob__note" style={{ ...box(SLOTS.note), ...fs(20) }} aria-label="가게 이야기">
+        {/* SINCE — 원형 도장 대신 대표메뉴 위 구분선 근처에 진한 검정 일자 텍스트 */}
+        {info.founded_year && (
+          <p className="wob__since" style={{ ...box(SLOTS.since), ...fs(30) }}>SINCE {info.founded_year}</p>
+        )}
+
+        <section className="wob__note" style={{ ...box(SLOTS.note), ...fs(24) }} aria-label="가게 이야기">
           {store.story_lines.map((line, i) => <p key={i}>{line}</p>)}
         </section>
 

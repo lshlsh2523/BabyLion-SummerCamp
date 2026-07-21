@@ -1,26 +1,15 @@
-import { useState } from 'react';
 import { useFlow } from '../../context/FlowContext';
-import { createStore } from '../../api/client';
 import { MESSAGES } from '../../constants/messages';
 import ScreenLayout from '../../components/ScreenLayout';
 import BigButton from '../../components/BigButton';
 import GrandmaPhone from '../../components/illustrations/GrandmaPhone';
 
 export default function P0Start({ speak, speaking }) {
-  const { goTo, setStore } = useFlow();
-  const [loading, setLoading] = useState(false);
+  const { goTo } = useFlow();   // store 는 Signup 단계에서 이미 생성됨
 
-  const handleStart = async () => {
-    if (loading) return;
-    setLoading(true);
-    try {
-      const res = await createStore();   // POST /stores
-      setStore(res);
-      speak(MESSAGES.P1.steps[0].tts);
-      goTo('P1');
-    } finally {
-      setLoading(false);
-    }
+  const handleStart = () => {
+    speak(MESSAGES.P1.steps[0].tts);
+    goTo('P1');
   };
 
   return (

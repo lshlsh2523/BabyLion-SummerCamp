@@ -41,7 +41,7 @@
 .nk__category {
   display: flex; align-items: center; justify-content: center;
   font-family: var(--nk-serif); font-weight: 700;
-  letter-spacing: 0.04em; color: #fff;
+  letter-spacing: 0.04em; color: #222;
   white-space: nowrap;
 }
 
@@ -59,6 +59,10 @@
   word-break: keep-all;
 }
 .nk__hl-em { font-style: normal; font-weight: 700; color: var(--nk-green-deep); }
+
+/* 3문장 서사 스토리 — 위에서부터 채우고 문장 간 간격 */
+.nk__story { justify-content: flex-start; gap: 8px; overflow: hidden; }
+.nk__story p { margin: 0; }
 
 .nk__hero {
   object-fit: cover;

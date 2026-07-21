@@ -72,11 +72,29 @@
   display: flex;
   align-items: center;
   font-family: var(--wob-serif);
-  font-weight: 700;
+  font-weight: 900;
   letter-spacing: 0.15em;        /* 가이드 5.4px/36px ≈ 0.15em */
-  color: #5d0800;
+  color: #111;
   white-space: nowrap;
   overflow: visible;
+}
+.wob__since {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--wob-serif);
+  font-weight: 800;
+  letter-spacing: 0.22em;
+  color: #1a1a1a;               /* 진한 검정 일자 텍스트 */
+}
+.wob__quote {
+  display: flex;
+  align-items: flex-start;
+  font-family: var(--wob-hand);
+  font-weight: 700;
+  line-height: 1.7;             /* 줄 배경에 맞춰 여러 줄 */
+  color: #111;
+  word-break: keep-all;
 }
 .wob__category {
   display: flex;
@@ -90,9 +108,9 @@
   display: flex;
   align-items: center;
   font-family: var(--wob-serif);
-  font-weight: 500;
+  font-weight: 700;
   letter-spacing: 0.12em;
-  color: #630a01;
+  color: #111;
 }
 
 .wob__stamp {
@@ -111,7 +129,8 @@
   transform: rotate(4.5deg);     /* 쪽지 종이 기울기 실측치(시계방향) — 어긋나면 여기 조정 */
   text-align: center;
   font-family: var(--wob-hand);
-  color: #4c0700;
+  font-weight: 700;
+  color: #111;
 }
 .wob__note p { margin: 0; line-height: 1.4; word-break: keep-all; }
 
@@ -131,18 +150,19 @@
   align-items: center;
   justify-content: center;
   font-family: 'Inter', 'Noto Sans KR', sans-serif;
-  font-weight: 500;
-  color: #1a0d05;
+  font-weight: 800;
+  color: #111;
   white-space: nowrap;
 }
-.wob__value--sub { font-weight: 400; color: #3a2a1a; }
+.wob__value--sub { font-weight: 600; color: #2a2a2a; }
 
 .wob__tag {
   display: flex;
   align-items: center;
   justify-content: center;
   font-family: 'Inter', 'Noto Sans KR', sans-serif;
-  color: #5d0800;
+  font-weight: 700;
+  color: #111;
   white-space: nowrap;
 }
 

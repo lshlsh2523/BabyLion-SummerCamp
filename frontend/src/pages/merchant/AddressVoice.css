@@ -1,0 +1,25 @@
+.addr-rec { margin-top: 22px; display: flex; flex-direction: column; align-items: center; gap: 16px; }
+
+.addr-rec__hint {
+  margin: 0; white-space: pre-line; text-align: center;
+  font-size: var(--fs-body); font-weight: var(--fw-medium); color: var(--green-sub);
+}
+.addr-rec__value {
+  margin: 0; text-align: center;
+  font-size: 22px; font-weight: var(--fw-bold); color: var(--green-900);
+}
+.addr-rec__status {
+  margin: 0; text-align: center;
+  font-size: var(--fs-body); font-weight: var(--fw-medium); color: var(--green-sub);
+}
+
+.addr-mic {
+  width: 126px; height: 126px;
+  border-radius: 50%;
+  background: var(--grad-select);
+  box-shadow: 0 12px 30px rgba(101, 193, 53, 0.38);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+  color: #fff; font-size: 16px; font-weight: var(--fw-bold);
+}
+.addr-mic--on { background: linear-gradient(135deg, #FFB84D, #E8862B); box-shadow: 0 12px 30px rgba(232, 134, 43, 0.38); }
+.addr-mic:disabled { opacity: 0.6; }

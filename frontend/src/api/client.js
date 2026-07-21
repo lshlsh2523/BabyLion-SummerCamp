@@ -13,8 +13,14 @@ import { CONFIG } from '../constants/config';
 
 const BASE = `${import.meta.env.VITE_API_HOST}/api/v1`;
 
-/** FlowContext가 sessionStorage에 동기화해 둔 상태에서 editToken을 읽는다 (새 저장소 추가 금지). */
+// createStore 로 갓 발급된 토큰을 메모리에 즉시 보관한다.
+// (FlowContext 의 sessionStorage 동기화는 리렌더 후 useEffect 에서 일어나, 같은 함수 안에서
+//  createStore 직후 이어지는 쓰기 요청은 sessionStorage 에 아직 토큰이 없어 403 이 난다.)
+let authToken = null;
+
+/** 메모리 토큰을 우선 사용하고, 없으면 sessionStorage(새로고침 복구용)에서 읽는다. */
 const getEditToken = () => {
+  if (authToken) return authToken;
   try {
     const raw = sessionStorage.getItem(CONFIG.SESSION_KEY);
     return raw ? JSON.parse(raw).editToken : null;
@@ -56,7 +62,11 @@ async function request(path, { method = 'GET', body, auth = true } = {}) {
   return data;
 }
 
-export const createStore    = ()                => request('/stores', { method: 'POST', auth: false });
+export const createStore = async () => {
+  const res = await request('/stores', { method: 'POST', auth: false });
+  if (res?.edit_token) authToken = res.edit_token;   // 이후 쓰기 요청이 즉시 이 토큰을 쓰도록
+  return res;
+};
 export const getStore       = (storeId)          => request(`/stores/${storeId}`);
 export const saveBasicInfo  = (storeId, partial) => request(`/stores/${storeId}/basic-info`, { method: 'PUT', body: partial });
 
@@ -91,12 +101,21 @@ export const generate = (storeId, { retry = false } = {}) =>
 export const getJob  = (jobId)   => request(`/jobs/${jobId}`);
 export const publish = (storeId) => request(`/stores/${storeId}/publish`, { method: 'POST' });
 
+// 발행된 가게 목록 (노포 지도용)
+export const getPublicStores = () => request('/public/stores', { auth: false });
+
 export const getPublicStore = async (storeId) => {
   // DEV 전용 테마 프리뷰(/s/preview)는 백엔드 없이 mock 으로 유지
   if (import.meta.env.DEV && storeId === 'preview') return mockApi.getPublicStore('preview');
   const data = await request(`/public/stores/${storeId}`, { auth: false });
   const { story, ...rest } = data;          // 백엔드 중첩 story → 평면화 (StoryPage 계약)
-  return { ...rest, ...(story ?? {}) };
+  return {
+    ...rest,
+    ...(story ?? {}),
+    // 가게명·주소를 최상위로도 노출 (테마 페이지가 store.store_name / store.address 로 접근)
+    store_name: rest.basic_info?.store_name ?? null,
+    address: rest.basic_info?.address ?? null,
+  };
 };
 
 /** 미디어 상대경로 → 절대 URL (mock 단계에선 blob: URL이라 그대로 반환) */

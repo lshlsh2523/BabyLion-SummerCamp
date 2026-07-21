@@ -1,0 +1,300 @@
+/* 노포 지도 전용 팔레트 — 다른 화면에 영향 없도록 .map-screen 안에 스코프 */
+.map-screen {
+  --bg: var(--bg-app);   /* 다른 화면과 동일한 흰 배경(tokens.css) 사용 */
+  --surface: #FFFFFF;
+  --surface-strong: #FDFEF8;
+  --ink: #2B3320;
+  --heading: #1E4D0E;
+  --sub: #7A8468;
+  --primary: #4CA324;
+  --primary-strong: #3E9B1F;
+  --tag-text: #3E9B1F;
+  --tag-bg: #EFF8E2;
+  --card-border: #D8EEBB;
+  --card-border-strong: #A9D573;   /* 검색바/필터 칩처럼 흰 배경 위에서 잘 보여야 하는 테두리 */
+  --gray-placeholder: #B0B0B0;     /* 검색 placeholder / 칩 미선택 상태 텍스트 */
+
+  position: relative;
+  z-index: 0;   /* 아래 blob(z-index:-1)이 화면 밖으로 새지 않도록 자체 스태킹 컨텍스트 생성 */
+  height: 100dvh;
+  max-width: 480px;
+  margin: 0 auto;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  font-family: 'Noto Sans KR', sans-serif;
+  color: var(--ink);
+}
+
+/* 다른 화면(ScreenLayout)과 동일한 은은한 그라데이션 blob */
+.map-blob {
+  position: absolute;
+  z-index: -1;
+  width: 340px;
+  height: 340px;
+  border-radius: 50%;
+  pointer-events: none;
+}
+.map-blob--tr {
+  top: -140px; right: -140px;
+  background: radial-gradient(circle, rgba(255, 244, 94, 0.26) 0%, rgba(255, 244, 94, 0) 68%);
+}
+.map-blob--bl {
+  bottom: -150px; left: -140px;
+  background: radial-gradient(circle, rgba(139, 213, 67, 0.16) 0%, rgba(139, 213, 67, 0) 68%);
+}
+
+.map-screen__scrim {
+  position: absolute;
+  inset: 0;
+  z-index: 15;
+  background: transparent;
+}
+
+/* 헤더 */
+.map-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18px 16px 8px;
+}
+.map-header__title {
+  margin: 0;
+  font-size: 19px;
+  font-weight: 700;
+  color: var(--heading);
+}
+
+/* 검색바 */
+.map-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 8px 16px 0;
+  padding: 0 14px;
+  height: 46px;
+  background: var(--surface);
+  border: 1.5px solid var(--card-border-strong);
+  border-radius: 14px;
+  box-shadow: 0 3px 10px rgba(43, 51, 32, 0.10);
+}
+.map-search__icon { color: var(--sub); flex-shrink: 0; }
+.map-search__input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  background: none;
+  font-size: 15px;
+  color: var(--ink);
+}
+.map-search__input::placeholder { color: var(--gray-placeholder); }
+.map-search__input:focus { outline: none; }
+.map-search__clear {
+  flex-shrink: 0;
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--sub);
+  background: var(--bg-box);   /* 배경이 흰색이 된 검색창 위에서도 구분되도록 */
+}
+
+/* 필터 칩 — 가로 스크롤 줄. overflow-x:auto인 요소는 CSS 규칙상 overflow-y도
+   auto로 취급돼 내부의 절대위치 자식(드롭다운)을 잘라버리므로, 드롭다운은
+   이 요소 밖(.map-filter__dropdown, .map-screen 직속)에 별도로 그린다. */
+.map-filters {
+  display: flex;
+  gap: 8px;
+  padding: 12px 16px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.map-filters::-webkit-scrollbar { display: none; }
+
+.map-filter__chip {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+  height: 36px;
+  padding: 0 12px;
+  background: var(--surface);
+  border: 1.5px solid var(--card-border-strong);
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--gray-placeholder);   /* 아직 고르지 않은 기본 상태 */
+  white-space: nowrap;
+  box-shadow: 0 2px 8px rgba(43, 51, 32, 0.10);
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+.map-filter__chip svg { transition: transform 0.15s ease; color: var(--gray-placeholder); }
+
+/* 옵션을 한 번이라도 고르면 진하게 + 연한 초록 배경으로 활성 표시 */
+.map-filter__chip--selected { background: var(--tag-bg); border-color: var(--card-border-strong); color: var(--ink); }
+.map-filter__chip--selected svg { color: var(--ink); }
+
+/* 드롭다운이 열려 있는 동안은 선택 여부와 무관하게 편집 중 상태로 표시 */
+.map-filter__chip--open {
+  background: var(--surface);
+  border-color: var(--primary);
+  color: var(--primary-strong);
+}
+.map-filter__chip--open svg { transform: rotate(180deg); color: var(--primary-strong); }
+
+.map-filter__dropdown {
+  position: absolute;
+  z-index: 25;
+  min-width: 128px;
+  margin: 0;
+  padding: 6px;
+  list-style: none;
+  background: var(--surface);
+  border: 1px solid var(--card-border);
+  border-radius: 12px;
+  box-shadow: 0 10px 24px rgba(43, 51, 32, 0.14);
+}
+.map-filter__option {
+  width: 100%;
+  padding: 9px 10px;
+  border-radius: 8px;
+  text-align: left;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ink);
+  white-space: nowrap;
+}
+.map-filter__option:active { background: var(--tag-bg); }
+.map-filter__option--active { color: var(--primary-strong); font-weight: 700; background: var(--tag-bg); }
+
+/* 지도 플레이스홀더 */
+.map-area {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  margin: 4px 16px 0;
+  border-radius: 18px;
+  background: #E7EBDD;
+  overflow: hidden;
+}
+.map-area__label {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--sub);
+}
+.map-area__kakao { width: 100%; height: 100%; }
+.map-area__error {
+  position: absolute;
+  bottom: 10px; left: 50%;
+  transform: translateX(-50%);
+  font-size: 12px;
+  color: var(--sub);
+}
+/* 하단 바텀시트 */
+.map-sheet {
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  z-index: 5;
+  max-height: 70%;
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  border-radius: 20px 20px 0 0;
+  box-shadow: 0 -8px 24px rgba(43, 51, 32, 0.16);
+  transform: translateY(calc(100% - 64px));
+  transition: transform 0.28s ease;
+}
+.map-sheet--open { transform: translateY(0); }
+
+.map-sheet__handle {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 28px;
+  padding-top: 10px;
+  touch-action: none;
+  cursor: grab;
+}
+.map-sheet__handle-bar {
+  width: 40px; height: 5px;
+  border-radius: 999px;
+  background: var(--card-border);
+}
+
+.map-sheet__list {
+  margin: 0;
+  padding: 4px 16px 20px;
+  list-style: none;
+  overflow-y: auto;
+}
+.map-sheet__empty {
+  margin: 24px 16px;
+  text-align: center;
+  font-size: 14px;
+  color: var(--sub);
+}
+
+.map-store {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 4px;
+  border-bottom: 1px solid var(--card-border);
+  cursor: pointer;
+}
+.map-store:last-child { border-bottom: none; }
+.map-store--active { background: var(--surface-strong); border-radius: 14px; }
+
+.map-store__thumb {
+  flex-shrink: 0;
+  width: 56px; height: 56px;
+  border-radius: 14px;
+  background: var(--tag-bg);
+  color: var(--primary-strong);
+  display: flex; align-items: center; justify-content: center;
+}
+.map-store__body { flex: 1; min-width: 0; }
+.map-store__name {
+  margin: 0 0 4px;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--ink);
+}
+.map-store__tags { display: flex; gap: 6px; margin-bottom: 6px; flex-wrap: wrap; }
+.map-store__tag {
+  padding: 3px 10px;
+  border-radius: 99px;
+  background: var(--tag-bg);
+  color: var(--tag-text);
+  font-size: 12px;
+  font-weight: 600;
+}
+.map-store__reason {
+  margin: 0;
+  font-size: 13px;
+  color: var(--sub);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.map-store__arrow { flex-shrink: 0; color: var(--sub); }
+
+/* 핀 클릭 시 상세 카드 */
+.map-detail { padding: 4px 20px 20px; display: flex; flex-direction: column; gap: 10px; }
+.map-detail__name { margin: 0; font-size: 20px; font-weight: 800; color: var(--ink); }
+.map-detail__link {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  margin-top: 4px; padding: 13px 16px; border-radius: 14px;
+  background: var(--green-600, #3f9142); color: #fff;
+  font-size: 15px; font-weight: 700; text-decoration: none;
+}
+.map-detail__nopage { margin: 4px 0 0; font-size: 13px; color: var(--sub); }
+.map-detail__back {
+  align-self: flex-start; margin-top: 2px; padding: 6px 0;
+  background: none; border: none; color: var(--sub);
+  font-size: 13px; font-weight: 600; cursor: pointer;
+}

@@ -29,8 +29,9 @@ const SLOTS = {
   hero:      [70, 236, 244, 278],   // 좌상단 폴라로이드 프레임 안쪽(픽셀 실측, rotate(-2deg) 기준)
   name:      [395, 290, 370, 110],
   category:  [415, 375, 330, 55],   // 가게명과 겹치지 않는 선에서 위로
-  headline:  [30, 625, 400, 130],   // body가 위로 올라온 만큼 하단 여백 확보
-  body:      [30, 765, 400, 300],
+  address:   [415, 432, 350, 40],   // 주소 (카테고리 아래 여백; ?debug로 미세조정)
+  headline:  [30, 560, 400, 90],    // (백엔드 headline 미사용 시 비어 있음)
+  body:      [30, 560, 430, 470],   // 스토리를 폴라로이드 아래 빈 공간(위쪽)으로 이동 + 여유 높이
   menuPhoto: [480, 830, 290, 250],
   // 아이콘 오른쪽 "값" 영역 — 라벨/아이콘은 배경에 그려져 있고, 여긴 값만 얹음.
   // 각 카드의 아이콘 우측 끝 실측치 기준으로 x 시작점을 잡음.
@@ -78,10 +79,9 @@ export default function TrendyAlleyPage({ store }) {
   const gallery = [photos[1], photos[2], photos[3], photos[0]].filter(Boolean);
 
   const debug = typeof window !== 'undefined' && window.location.search.includes('debug');
-  const storeName = store.title?.includes(',')
-    ? store.title.slice(store.title.lastIndexOf(',') + 1).trim()
-    : store.title;
-  const mapHref = `https://map.naver.com/p/search/${encodeURIComponent(storeName)}`; // TODO: 지도 협의
+  const storeName = store.store_name
+    || (store.title?.includes(',') ? store.title.slice(store.title.lastIndexOf(',') + 1).trim() : store.title);
+  const mapHref = `https://map.kakao.com/?q=${encodeURIComponent(store.address || storeName)}`; // 주소 우선, 없으면 가게명
 
   return (
     <div className="ta-page">
@@ -94,6 +94,9 @@ export default function TrendyAlleyPage({ store }) {
         )}
 
         <h1 className="ta__name" style={{ ...box(SLOTS.name), ...fs(64) }}>{storeName}</h1>
+        {store.address && (
+          <p className="ta__category" style={{ ...box(SLOTS.address), ...fs(22) }}>{store.address}</p>
+        )}
         {info.main_menu && (
           <p className="ta__category" style={{ ...box(SLOTS.category), ...fs(30) }}>
             {info.main_menu} 전문
